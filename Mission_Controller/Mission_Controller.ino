@@ -5,21 +5,17 @@
  * 
  */
 
-
+#include "Wall-E_Libraries.h"
 #include "Pin_Assignments.h"
-#include "Libraries.h"
+#include "Rf_Communications.h"
 #include "Nav_System.h"
 
 void setup(){
-
-    //Defining Globals
-    const float TERMINATE_DISTANCE = 1.00;
-
     //Initializae Serial port for debugging
     Serial.begin(115200);
 
     //Call setup funciton for the Navigation systen
-    setupNav();
+    setup_Nav();
 
     //Call setup function for receiver (manual control)
     //setupReceiver();

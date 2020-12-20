@@ -6,7 +6,7 @@
  */
 
 #ifndef _PINASSIGNMENTS_H    
-#define _PINASSIGNMENTS_H    
+ #define _PINASSIGNMENTS_H    
 
  //BN0055 Assignments:
  
@@ -25,22 +25,11 @@
  #define CE 4
  #define CSN 5
 
- //GPS Pins
- 
+ //ADAfruit GPS board assignments:
 
- //Mode Switch pins
- #define MODE_SWITCH 1
- #define INITIALIZE_SWITCH 1
-
- //Motor Pins
- #define RIGHT_MOTOR_A
- #define RIGHT_MOTOR_B
- #define RIGHT_MOTOR_ ENABLE
-
- #define LEFT_MOTOR_A
- #define LEFT_MOTOR_B
- #define LEFT_MOTOR_ENABLE
+ #define GPS_TX_PIN 11 //GPS module RX goes here
+ #define GPS_RX_PIN 12 //GPS module TX goes here
 
 
 
- #endif
+#endif

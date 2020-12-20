@@ -1,31 +1,18 @@
 /*  RF Communications
  *  
- *  Created by: Marko Jurisic
- *  Date: 17th December 2020
- *  Purpose: Contains setup and working code for the RF communication system
+ *  Created by: Janith Wijekoon
+ *  Date: 19th December 2020
+ *  Purpose: Hold constants and variables necessary for RF communication.
  */
 
-#include "Pin_Assignments.h"
-#include "Wall-E_Libraries.h"
+#ifndef _RF_COMMS_H    
+ #define _RF_COMMS_H    
 
-void setupRfCommunications(mode){
+ //variables
+ 
+ const float TERMINATE_DISTANCE = 1.00;
 
-	//Setting up RF as a receiver
-	if (mode == 1){
+ //function delarations 
 
-		radio.begin();
- 		radio.openReadingPipe(0, address);
-		radio.setPALevel(RF24_PA_MIN);
-		radio.startListening();
-
-	}
-
-	//Setting up RF as a transmitter
-	else{
-		  radio.begin();
-  		radio.openWritingPipe(address);
-  		radio.setPALevel(RF24_PA_MIN);
-      radio.stopListening();
-	}
-
-}
+ void setupRfCommunications(int mode);
+#endif
