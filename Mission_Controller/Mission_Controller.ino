@@ -7,12 +7,14 @@
 
 
 #include "Pin_Assignments.h"
-#include "Libraries.h"
+#include "Wall-E_Libraries.h"
 #include "Nav_System.h"
+#include "Rf_Communications.h"
+#include "Motor_Controller.h"
 
 //Defining Globals
 float target_data[2]= {0.00,0.00};
-float navigation_data = {}; // Current Lattidue,Current Longitude, Distance, Bearing, Heading
+float navigation_data[5] = {0.00,0.00,0.00,0.00,0.00}; // Current Lattidue,Current Longitude, Distance, Bearing, Heading
 
 void setup(){
 
@@ -35,9 +37,9 @@ void loop()
   
   navSystem(target_data[0],target_data[1],navigation_data);
   
-  sendData(navigation_data);
+  sendDataRf(navigation_data);
   
-  motor_controller(navigation_data[2],navigation_data[3],navigation_data[4]);
+  motorController(navigation_data[2],navigation_data[3],navigation_data[4]);
 }
 
 

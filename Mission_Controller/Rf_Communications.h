@@ -6,13 +6,12 @@
  */
 
 #ifndef _RF_COMMS_H    
- #define _RF_COMMS_H    
+#define _RF_COMMS_H    
 
- //variables
- 
- const float TERMINATE_DISTANCE = 1.00;
+//function delarations 
 
- //function delarations 
+void setupRfCommunications(int mode);
+void initializeTarget(float targetData[]);
+void sendDataRf(float navigationData[]);
 
- void setupRfCommunications(int mode);
 #endif

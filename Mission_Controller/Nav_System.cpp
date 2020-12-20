@@ -2,7 +2,7 @@
 #include "Pin_Assignments.h"
 #include "Nav_System.h"
 
-void setup_Nav() {
+void setupNav() {
   bno.begin();
   /*
   GPS.begin(9600);  
@@ -14,7 +14,7 @@ void setup_Nav() {
   current_time = millis();
 }
 
-void nav_System(float d_latitude, float d_longitude, float *return_vals) {
+void navSystem(float d_latitude, float d_longitude, float *return_vals) {
   /* return_vals[0] --> c_latitude 
    * return_vals[1] --> c_longitude 
    * return_vals[2] --> distance

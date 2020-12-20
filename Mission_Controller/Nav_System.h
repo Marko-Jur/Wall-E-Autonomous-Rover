@@ -32,8 +32,8 @@
  
  //function declarations:
 
- void setup_Nav();
- void nav_System(float d_latitude, float d_longitude, float *return_vals);
+ void setupNav();
+ void navSystem(float d_latitude, float d_longitude, float *return_vals);
 
  //function calls:
 
