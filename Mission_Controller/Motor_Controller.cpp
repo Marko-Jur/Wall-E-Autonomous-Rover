@@ -7,11 +7,15 @@
  *         poisitional data to the GCS
  */
 
+#include "Wall-E_Libraries.h"
+#include "Pin_Assignments.h"
+#include "Motor_Controller.h"
+
+//constants
 #define MAX_SPEED 240 //The max speed Wall-E can go too
+#define ACCEPTABLE_RANGE 1.00
 
-const float ACCEPTABLE_ERROR_RANGE = 1.00 //The max error we will accept for the heading and bearing error
-
-void motorController(float bearing, float heading){
+void motorController(float bearing, float heading, float distance){
 
 	//PID constants
 	float motor_KP = 0.00;
@@ -19,7 +23,7 @@ void motorController(float bearing, float heading){
 	float motor_KD = 0.00;
 
 	//Setting up a base speed for the motors, eg this is the speed they always turn at and the speeds required to maintain a straight line. These values are determined
-	through experimentation.
+ //through experimentation.
 	int right_motor_base = 150;
 	int left_motor_base = 140;
 
@@ -29,7 +33,7 @@ void motorController(float bearing, float heading){
 	
 
 
-	//Calculating the error between the heading and the bearing
+	//Calculating the direction_error between the heading and the bearing
 	float direction_error = heading - bearing;
 
 	//Setup Motor Directions:
@@ -40,11 +44,11 @@ void motorController(float bearing, float heading){
 	digitalWrite(LEFT_MOTOR_A,HIGH);
 	digitalWrite(LEFT_MOTOR_B,LOW);
 
-	//If error is greater than the range, that means we must turn right
-	if (error > ACCEPTABLE_ERROR_RANGE){
+	//If direction_error is greater than the range, that means we must turn right
+	if (abs(direction_error) > ACCEPTABLE_RANGE){
 		//Calculating the speeds to each motor:
-		right_motor_value = right_motor_base - (motor_KP *error);
-		left_motor_value = left_motor_base + (motor_KP *error);
+		right_motor_value = right_motor_base - (motor_KP *direction_error);
+		left_motor_value = left_motor_base + (motor_KP *direction_error);
 		
 		//Setting right_motor to 0 to stop the value going below 0
 		if (right_motor_value < 0)
@@ -64,11 +68,11 @@ void motorController(float bearing, float heading){
 	}
 	
 
-	//If error is less than the negative range, that means we must turn left
-	if (error < ACCEPTABLE_ERROR_RANGE){
+	//If direction_error is less than the negative range, that means we must turn left
+	if (direction_error < ACCEPTABLE_RANGE){
 		//Calculating the speeds to each motor:
-		right_motor_value = right_motor_base + (motor_KP *error);
-		left_motor_value = left_motor_base - (motor_KP *error);
+		right_motor_value = right_motor_base + (motor_KP *direction_error);
+		left_motor_value = left_motor_base - (motor_KP *direction_error);
 		
 		//Setting right_motor to 0 to stop the value going below 0
 		if (left_motor_value < 0)
@@ -89,5 +93,3 @@ void motorController(float bearing, float heading){
 
 
 }
-
-

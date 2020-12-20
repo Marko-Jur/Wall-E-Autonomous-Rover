@@ -2,7 +2,39 @@
 #include "Pin_Assignments.h"
 #include "Nav_System.h"
 
-void setup_Nav() {
+//constants:
+
+#define GPSECHO true
+#define EARTH_RAD 6371000.0
+#define MAGNETIC_DECLINATION 16.1
+#define IMU_CALIBRATION_ROUNDS 3000
+
+
+//variables:
+
+uint16_t BNO055_SAMPLERATE_DELAY_MS = 100;
+
+float current_time = 0;
+float latitude_min, longitude_min, bearing, heading, current_latitude, current_longitude, h_a, h_c, distance_x;
+float roll, pitch, yaw;
+float currentTime, prevTime, elapsedTime;
+ 
+double min_x, max_x, mid_x, acc_x, gyro_x, mag_x, acc_angleX, gyro_anglex, acc_error_x, gyro_error_x, mag_x_proj;
+double min_y, max_y, mid_y, acc_y, gyro_y, mag_y, acc_angleY, gyro_angley, acc_error_y, gyro_error_y, mag_y_proj;
+double min_z, max_z, mid_z, acc_z, gyro_z, mag_z, gyro_error_z;
+ 
+int imuready, cycle_count;
+
+sensors_event_t orientationData , angVelocityData , linearAccelData, magnetometerData, accelerometerData, gravityData;
+ 
+
+//function calls:
+
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
+//SoftwareSerial mySerial(GPS_RX_PIN, GPS_TX_PIN);
+//Adafruit_GPS GPS(&mySerial);
+
+void setupNav() {
   bno.begin();
   /*
   GPS.begin(9600);  
@@ -14,15 +46,14 @@ void setup_Nav() {
   current_time = millis();
 }
 
-void nav_System(float d_latitude, float d_longitude, float *return_vals) {
+void navSystem(float d_latitude, float d_longitude, float *return_vals) {
   /* return_vals[0] --> c_latitude 
    * return_vals[1] --> c_longitude 
    * return_vals[2] --> distance
    * return_vals[3] --> bearing
    * return_vals[2] --> heading 
    */
-
-  sensors_event_t orientationData , angVelocityData , linearAccelData, magnetometerData, accelerometerData, gravityData;
+  
   bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
   bno.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
   bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
@@ -34,6 +65,32 @@ void nav_System(float d_latitude, float d_longitude, float *return_vals) {
   acc_y = accelerometerData.acceleration.y;
   acc_z = accelerometerData.acceleration.z;
 
+  gyro_x = angVelocityData.gyro.x;
+  gyro_x = angVelocityData.gyro.x;
+  gyro_x = angVelocityData.gyro.x;
+
+  mag_x = magnetometerData.magnetic.x;
+  mag_y = magnetometerData.magnetic.y;
+  mag_z = magnetometerData.magnetic.z;
+  
+  pitch = orientationData.orientation.z * (PI/180) ;
+  roll  = orientationData.orientation.y * (PI/180) ;
+  yaw   = orientationData.orientation.x * (PI/180) ;
+
+  mag_x_proj = mag_x * cos(pitch) + mag_y * sin(roll)*sin(pitch) - mag_z*cos(roll)*sin(pitch); //tilt-compensation 
+  mag_y_proj = mag_y * cos(roll) + mag_z * sin(roll);
+
+  heading = atan2(mag_y, mag_x) * (180/PI) + MAGNETIC_DECLINATION; //heading with corrected declination
+  if (heading > 180)
+    heading -= 360;
+
+  Serial.println(heading);
+
+  /*
+  Serial.println(acc_x);
+  Serial.println(acc_y);
+  Serial.println(acc_z);*/
+
   int8_t boardTemp = bno.getTemp();
   uint8_t system, gyro, accel, mag = 0;
   bno.getCalibration(&system, &gyro, &accel, &mag);
@@ -41,8 +98,8 @@ void nav_System(float d_latitude, float d_longitude, float *return_vals) {
    /*
    GPS.read();
    if (GPS.newNMEAreceived()) {
-    if (!GPS.parse(GPS.lastNMEA()))   // this also sets the newNMEAreceived() flag to false
-      return;  // we can fail to parse a sentence in which case we should just wait for another
+    if (!GPS.parse(GPS.lastNMEA()))   // also sets newNMEAreceived flag to false
+      return;  
    } 
    
    if((millis() - current_time) > 1000){
@@ -59,10 +116,10 @@ void nav_System(float d_latitude, float d_longitude, float *return_vals) {
     longitude_min = (current_longitude*(-100)+(float)GPS.longitude);
     current_longitude = ((float)(current_longitude) + longitude_min/60.0) * (-PI/180);
         
-    h_a = sin((destination_latitude - current_latitude)/2) * sin((destination_latitude - current_latitude)/2) + cos(current_latitude) * cos(destination_latitude) * sin((destination_longitude - current_longitude)/2) * sin((destination_longitude - current_longitude)/2);
+    h_a = sin((d_latitude - current_latitude)/2) * sin((d_latitude - current_latitude)/2) + cos(current_latitude) * cos(d_latitude) * sin((d_longitude - current_longitude)/2) * sin((d_longitude - current_longitude)/2);
     h_c = 2 * atan2(sqrt(h_a), sqrt(1-h_a));
     distance_x = h_c * EARTH_RAD;
-    bearing = atan2((destination_latitude - current_latitude),(destination_longitude - current_longitude)) * (180/PI);
+    bearing = atan2((d_latitude - current_latitude),(d_longitude - current_longitude)) * (180/PI);
     
     Serial.print(" | lat:");
     Serial.print(current_latitude * (180/PI), 5);

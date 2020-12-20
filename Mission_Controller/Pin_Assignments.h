@@ -1,3 +1,4 @@
+
 /* Pin Assignments
  *  
  *  Created by: Marko Jurisic
@@ -6,7 +7,7 @@
  */
 
 #ifndef _PINASSIGNMENTS_H    
- #define _PINASSIGNMENTS_H    
+#define _PINASSIGNMENTS_H    
 
  //BN0055 Assignments:
  
@@ -29,6 +30,15 @@
 
  #define GPS_TX_PIN 11 //GPS module RX goes here
  #define GPS_RX_PIN 12 //GPS module TX goes here
+
+ //Motor Pins:
+ #define RIGHT_MOTOR_A 1
+ #define RIGHT_MOTOR_B 2
+ #define RIGHT_MOTOR_ENABLE 3
+
+ #define LEFT_MOTOR_A 7
+ #define LEFT_MOTOR_B 9
+ #define LEFT_MOTOR_ENABLE 10
 
 
 
