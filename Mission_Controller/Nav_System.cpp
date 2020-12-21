@@ -31,17 +31,17 @@ sensors_event_t orientationData , angVelocityData , linearAccelData, magnetomete
 //function calls:
 
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
-//SoftwareSerial mySerial(GPS_RX_PIN, GPS_TX_PIN);
-//Adafruit_GPS GPS(&mySerial);
+Adafruit_GPS GPS(&GPS_SERIAL);
 
 void setupNav() {
   bno.begin();
-  /*
+  
   GPS.begin(9600);  
+  GPS_SERIAL.begin(9600);
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
   GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);   // Do not exceed 1 Hz update rate
-  GPS.sendCommand(PGCMD_ANTENNA);
-  mySerial.println(PMTK_Q_RELEASE); */
+  //GPS.sendCommand(PGCMD_ANTENNA);
+  GPS_SERIAL.println(PMTK_Q_RELEASE); 
 
   current_time = millis();
 }
@@ -83,19 +83,12 @@ void navSystem(float d_latitude, float d_longitude, float *return_vals) {
   heading = atan2(mag_y, mag_x) * (180/PI) + MAGNETIC_DECLINATION; //heading with corrected declination
   if (heading > 180)
     heading -= 360;
-
-  Serial.println(heading);
-
-  /*
-  Serial.println(acc_x);
-  Serial.println(acc_y);
-  Serial.println(acc_z);*/
-
+    
   int8_t boardTemp = bno.getTemp();
   uint8_t system, gyro, accel, mag = 0;
   bno.getCalibration(&system, &gyro, &accel, &mag);
 
-   /*
+   
    GPS.read();
    if (GPS.newNMEAreceived()) {
     if (!GPS.parse(GPS.lastNMEA()))   // also sets newNMEAreceived flag to false
@@ -131,6 +124,6 @@ void navSystem(float d_latitude, float d_longitude, float *return_vals) {
     Serial.print(heading);
     Serial.print(" | dist:");
     Serial.println(distance_x);
-   }*/
+   }
   
 }

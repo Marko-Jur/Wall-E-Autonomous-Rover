@@ -26,11 +26,10 @@
  #define CE 4
  #define CSN 5
 
- //ADAfruit GPS board assignments:
+  //Serial port assignments:
+ #define GPS_SERIAL Serial1 //Rx --> 0, Tx --> 1
 
- #define GPS_TX_PIN 11 //GPS module RX goes here
- #define GPS_RX_PIN 12 //GPS module TX goes here
-
+ 
  //Motor Pins:
  #define RIGHT_MOTOR_A 1
  #define RIGHT_MOTOR_B 2
