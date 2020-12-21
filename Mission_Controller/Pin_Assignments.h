@@ -31,13 +31,13 @@
 
  
  //Motor Pins:
- #define RIGHT_MOTOR_A 1
- #define RIGHT_MOTOR_B 2
- #define RIGHT_MOTOR_ENABLE 3
+ #define RIGHT_MOTOR_A 2
+ #define RIGHT_MOTOR_B 3
+ #define RIGHT_MOTOR_ENABLE 14
 
- #define LEFT_MOTOR_A 7
- #define LEFT_MOTOR_B 9
- #define LEFT_MOTOR_ENABLE 10
+ #define LEFT_MOTOR_A 4
+ #define LEFT_MOTOR_B 5
+ #define LEFT_MOTOR_ENABLE 15
 
 
 
