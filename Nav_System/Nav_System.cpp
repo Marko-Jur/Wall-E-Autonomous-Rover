@@ -51,7 +51,7 @@ void navSystem(float d_latitude, float d_longitude, float *return_vals) {
    * return_vals[1] --> c_longitude 
    * return_vals[2] --> distance
    * return_vals[3] --> bearing
-   * return_vals[2] --> heading 
+   * return_vals[4] --> heading 
    */
   
   bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
@@ -119,14 +119,19 @@ void navSystem(float d_latitude, float d_longitude, float *return_vals) {
     
     Serial.print(" | lat:");
     Serial.print(current_latitude * (180/PI), 5);
+    return_vals[0] = current_latitude * (180/PI);
     Serial.print(" | long:");
     Serial.print(current_longitude * (180/PI), 5);
+    return_vals[1] = current_longitude * (180/PI);
     Serial.print(" | b:");
     Serial.print(bearing);
+    return_vals[3] = bearing;
     Serial.print(" | h:");
     Serial.print(heading);
+    return_vals[4] = heading;
     Serial.print(" | dist:");
     Serial.println(distance_x);
+    return_vals[2] = distance_x;
    }
   
 }

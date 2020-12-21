@@ -2,9 +2,9 @@
 #include "Pin_Assignments.h"
 #include "Nav_System.h"
 
-float dummy_1;
-float dummy_2;
-float dummy_3[5];
+float d_latitude = 49.264270;
+float d_longitude = -123.254017;
+float return_vals[5];
 
 void setup(){
   Serial.begin(115200);
@@ -12,6 +12,6 @@ void setup(){
 }
 
 void loop(){
-  navSystem(dummy_1, dummy_2, dummy_3);
+  navSystem(d_latitude, d_longitude, return_vals);
   delay(500);
 }
