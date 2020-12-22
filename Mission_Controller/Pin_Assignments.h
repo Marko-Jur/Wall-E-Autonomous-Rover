@@ -39,6 +39,9 @@
  #define LEFT_MOTOR_B 5
  #define LEFT_MOTOR_ENABLE 15
 
+//RC Pins
+#define RCRX 6
+
 
 
 #endif
