@@ -11,6 +11,7 @@
 #define _MOTORCONTROLLER_H    
 
 //function declarations 
+void motorSetup()
 void motorController(float bearing, float heading, float distance);
 
 #endif

@@ -15,6 +15,27 @@
 #define MAX_SPEED 240 //The max speed Wall-E can go too
 #define ACCEPTABLE_RANGE 1.00
 
+void motorSetup(){
+
+//Setup the motors
+ pinMode(RIGHT_MOTOR_A, OUTPUT);
+ pinMode(RIGHT_MOTOR_B, OUTPUT);
+ pinMode(RIGHT_MOTOR_ENABLE, OUTPUT);
+  
+ pinMode(LEFT_MOTOR_A, OUTPUT);
+ pinMode(LEFT_MOTOR_B, OUTPUT);
+ pinMode(LEFT_MOTOR_ENABLE, OUTPUT);
+
+ 
+ //Setup Motor Directions:
+ digitalWrite(RIGHT_MOTOR_A,HIGH);
+ digitalWrite(RIGHT_MOTOR_B,LOW);
+
+ digitalWrite(LEFT_MOTOR_A,HIGH);
+ digitalWrite(LEFT_MOTOR_B,LOW);
+
+}
+
 void motorController(float bearing, float heading, float distance){
 
 	//PID constants
