@@ -23,7 +23,7 @@ double min_x, max_x, mid_x, acc_x, gyro_x, mag_x, acc_angleX, gyro_anglex, acc_e
 double min_y, max_y, mid_y, acc_y, gyro_y, mag_y, acc_angleY, gyro_angley, acc_error_y, gyro_error_y, mag_y_proj;
 double min_z, max_z, mid_z, acc_z, gyro_z, mag_z, gyro_error_z;
  
-int imuready, cycle_count;
+int imuready, cycle_count;  
 
 sensors_event_t orientationData , angVelocityData , linearAccelData, magnetometerData, accelerometerData, gravityData;
  
@@ -51,7 +51,7 @@ void navSystem(float d_latitude, float d_longitude, float *return_vals) {
    * return_vals[1] --> c_longitude 
    * return_vals[2] --> distance
    * return_vals[3] --> bearing
-   * return_vals[2] --> heading 
+   * return_vals[4] --> heading 
    */
   
   bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
@@ -73,22 +73,38 @@ void navSystem(float d_latitude, float d_longitude, float *return_vals) {
   mag_y = magnetometerData.magnetic.y;
   mag_z = magnetometerData.magnetic.z;
   
-  pitch = orientationData.orientation.z * (PI/180) ;
-  roll  = orientationData.orientation.y * (PI/180) ;
+  pitch = orientationData.orientation.y * (PI/180) ;
+  roll  = orientationData.orientation.z * (PI/180) ;
   yaw   = orientationData.orientation.x * (PI/180) ;
 
   mag_x_proj = mag_x * cos(pitch) + mag_y * sin(roll)*sin(pitch) - mag_z*cos(roll)*sin(pitch); //tilt-compensation 
   mag_y_proj = mag_y * cos(roll) + mag_z * sin(roll);
 
-  heading = atan2(mag_y, mag_x) * (180/PI) + MAGNETIC_DECLINATION; //heading with corrected declination
+  heading = atan2(mag_y_proj, mag_x_proj) * (180/PI) + MAGNETIC_DECLINATION; //heading with corrected declination
   if (heading > 180)
     heading -= 360;
-    
+
+  Serial.println(heading);
+
+  return_vals[4] = heading;
+  return_vals[3] = 0;
+  return_vals[2] = 9001;
+  /*
+  Serial.print(orientationData.orientation.x);
+  Serial.print(" | ");
+  Serial.print(orientationData.orientation.y);
+  Serial.print(" | ");
+  Serial.print(orientationData.orientation.z);
+  Serial.println(" | ");*/
+  
+
+  /*
   int8_t boardTemp = bno.getTemp();
   uint8_t system, gyro, accel, mag = 0;
   bno.getCalibration(&system, &gyro, &accel, &mag);
-
-   
+  */
+  
+   /*
    GPS.read();
    if (GPS.newNMEAreceived()) {
     if (!GPS.parse(GPS.lastNMEA()))   // also sets newNMEAreceived flag to false
@@ -113,17 +129,23 @@ void navSystem(float d_latitude, float d_longitude, float *return_vals) {
     h_c = 2 * atan2(sqrt(h_a), sqrt(1-h_a));
     distance_x = h_c * EARTH_RAD;
     bearing = atan2((d_latitude - current_latitude),(d_longitude - current_longitude)) * (180/PI);
+
     
     Serial.print(" | lat:");
     Serial.print(current_latitude * (180/PI), 5);
+    return_vals[0] = current_latitude * (180/PI);
     Serial.print(" | long:");
     Serial.print(current_longitude * (180/PI), 5);
+    return_vals[1] = current_longitude * (180/PI);
     Serial.print(" | b:");
     Serial.print(bearing);
+    return_vals[3] = bearing;
     Serial.print(" | h:");
     Serial.print(heading);
+    return_vals[4] = heading;
     Serial.print(" | dist:");
     Serial.println(distance_x);
+    return_vals[2] = distance_x;
    }
-  
+  */
 }
