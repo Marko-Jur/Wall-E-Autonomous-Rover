@@ -40,7 +40,7 @@ void setupNav() {
   GPS_SERIAL.begin(9600);
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
   GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);   // Do not exceed 1 Hz update rate
-  GPS.sendCommand(PGCMD_ANTENNA);
+  //GPS.sendCommand(PGCMD_ANTENNA);
   GPS_SERIAL.println(PMTK_Q_RELEASE); 
 
   current_time = millis();
@@ -84,16 +84,24 @@ void navSystem(float d_latitude, float d_longitude, float *return_vals) {
   if (heading > 180)
     heading -= 360;
 
+  Serial.println(heading);
+
   return_vals[4] = heading;
-  return_vals[3] = 0;
-  return_vals[2] = 9001;
+  
+  /*
+  Serial.print(orientationData.orientation.x);
+  Serial.print(" | ");
+  Serial.print(orientationData.orientation.y);
+  Serial.print(" | ");
+  Serial.print(orientationData.orientation.z);
+  Serial.println(" | ");*/
   
 
-  /*
+  
   int8_t boardTemp = bno.getTemp();
   uint8_t system, gyro, accel, mag = 0;
   bno.getCalibration(&system, &gyro, &accel, &mag);
-  */
+  
   
    
    GPS.read();
@@ -138,4 +146,5 @@ void navSystem(float d_latitude, float d_longitude, float *return_vals) {
     Serial.println(distance_x);
     return_vals[2] = distance_x;
    }
+  
 }
