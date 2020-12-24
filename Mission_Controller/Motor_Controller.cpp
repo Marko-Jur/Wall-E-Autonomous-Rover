@@ -128,11 +128,3 @@ else{
 }
 
 }
-
-
-void encoderRead(){
-
-encoder_a_a_position += digitalRead(ENCODER_A_A);
-Serial.println(encoder_a_a_position);
-  
-}
