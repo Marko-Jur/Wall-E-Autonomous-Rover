@@ -31,8 +31,8 @@ void motorSetup(){
  pinMode(LEFT_MOTOR_ENABLE, OUTPUT);
 
  //Setting up Encoder pins
- pinMode(ENCODER_A_A, INPUT);
- pinMode(ENCODER_A_B,INPUT);
+ //pinMode(ENCODER_A_A, INPUT);
+ //pinMode(ENCODER_A_B,INPUT);
 
  //Setting initial encoder values to 0
  encoder_a_a_position = 0;
@@ -132,7 +132,7 @@ else{
 
 void encoderRead(){
 
-encoder_a_a_position += digitalRead(ENCODER_A_A);
-Serial.println(encoder_a_a_position);
+//encoder_a_a_position += digitalRead(ENCODER_A_A);
+//Serial.println(encoder_a_a_position);
   
 }

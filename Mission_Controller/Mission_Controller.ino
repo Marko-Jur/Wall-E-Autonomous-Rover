@@ -26,17 +26,17 @@ void setup(){
     setupNav();
 
     //Setup the RF as a receiver
-    setupRfCommunications(1); // Pass in 1 to set it up as a receiver
+    //setupRfCommunications(1); // Pass in 1 to set it up as a receiver
 
 }
 
 void loop()
 {
-  initializeTarget(target_data);
+  //initializeTarget(target_data);
   
   navSystem(target_data[0],target_data[1],navigation_data);
   
-  sendDataRf(navigation_data);
+  //sendDataRf(navigation_data);
   
-  motorController(navigation_data[2],navigation_data[3],navigation_data[4]);
+  motorController(navigation_data[3],navigation_data[4],navigation_data[2]);
 }
