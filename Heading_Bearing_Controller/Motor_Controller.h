@@ -13,6 +13,5 @@
 //function declarations 
 void motorController(float bearing, float heading, float distance);
 void motorSetup();
-void encoderRead();
 
 #endif

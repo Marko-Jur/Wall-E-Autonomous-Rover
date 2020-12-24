@@ -16,11 +16,8 @@
 #define ACCEPTABLE_RANGE 1.00
 #define TERMINATE_DISTANCE 1.00
 
-//Variables
-int encoder_a_a_position = 0;
-
 void motorSetup(){
-
+/*
 //Setup the motors
  pinMode(RIGHT_MOTOR_A, OUTPUT);
  pinMode(RIGHT_MOTOR_B, OUTPUT);
@@ -30,13 +27,6 @@ void motorSetup(){
  pinMode(LEFT_MOTOR_B, OUTPUT);
  pinMode(LEFT_MOTOR_ENABLE, OUTPUT);
 
- //Setting up Encoder pins
- pinMode(ENCODER_A_A, INPUT);
- pinMode(ENCODER_A_B,INPUT);
-
- //Setting initial encoder values to 0
- encoder_a_a_position = 0;
-
  
  //Setup Motor Directions:
  digitalWrite(RIGHT_MOTOR_A,HIGH);
@@ -44,8 +34,7 @@ void motorSetup(){
 
  digitalWrite(LEFT_MOTOR_A,HIGH);
  digitalWrite(LEFT_MOTOR_B,LOW);
- 
-
+*/
 }
 
 void motorController(float bearing, float heading, float distance){
@@ -57,8 +46,8 @@ void motorController(float bearing, float heading, float distance){
 
 	//Setting up a base speed for the motors, eg this is the speed they always turn at and the speeds required to maintain a straight line. These values are determined
  //through experimentation.
-	int right_motor_base = 120;
-	int left_motor_base = 120;
+	int right_motor_base = 130;
+	int left_motor_base = 150;
 
 	//Motor values that we write to the motors
 	int right_motor_value = 0;
@@ -125,14 +114,7 @@ if (distance > TERMINATE_DISTANCE){
 else{
     analogWrite(RIGHT_MOTOR_ENABLE, 0);
     analogWrite(LEFT_MOTOR_ENABLE, 0);
-}
-
-}
-
-
-void encoderRead(){
-
-encoder_a_a_position += digitalRead(ENCODER_A_A);
-Serial.println(encoder_a_a_position);
   
+}
+
 }
