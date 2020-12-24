@@ -87,7 +87,8 @@ void navSystem(float d_latitude, float d_longitude, float *return_vals) {
   Serial.println(heading);
 
   return_vals[4] = heading;
-  
+  return_vals[3] = 0;
+  return_vals[2] = 9001;
   /*
   Serial.print(orientationData.orientation.x);
   Serial.print(" | ");
@@ -95,9 +96,8 @@ void navSystem(float d_latitude, float d_longitude, float *return_vals) {
   Serial.print(" | ");
   Serial.print(orientationData.orientation.z);
   Serial.println(" | ");*/
-  
 
-  
+
   int8_t boardTemp = bno.getTemp();
   uint8_t system, gyro, accel, mag = 0;
   bno.getCalibration(&system, &gyro, &accel, &mag);
@@ -146,5 +146,4 @@ void navSystem(float d_latitude, float d_longitude, float *return_vals) {
     Serial.println(distance_x);
     return_vals[2] = distance_x;
    }
-  
 }
