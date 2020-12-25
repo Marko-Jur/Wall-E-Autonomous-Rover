@@ -9,6 +9,7 @@
 #include "Wall-E_Libraries.h"
 #include "Rf_Communications.h"
 
+
 //variables 
 const byte address[6] = "00001";
 
@@ -20,7 +21,7 @@ void setupRfCommunications(int mode){
 
   radio.begin();
   //Setting up RF as a receiver
-  if (mode == 1){
+  if (mode == RX_MODE){
 
     
     radio.openReadingPipe(0, address);
@@ -47,6 +48,8 @@ void setupRfCommunications(int mode){
  * Purpose: Initializes the target array with the target longitude and lattitude
  */
 void initializeTarget(float *target_data){
+
+  setupRfCommunications(RX_MODE); //Pass in 0 to set it up as a transmitter
   
   while (target_data[0]==0.00 || target_data[1] == 0.00){
     if (radio.available()) {
@@ -54,7 +57,7 @@ void initializeTarget(float *target_data){
     }
   }
 
-  setupRfCommunications(0); //Pass in 0 to set it up as a transmitter
+  
 
 }
 
@@ -65,8 +68,9 @@ void initializeTarget(float *target_data){
  * 
  * Purpose: Sends Wall-E data via RF to the GUI
  */
-void sendDataRf(float navigationData[]) {
+void sendDataRf(float * navigationData) {
 
-  Serial.println("fejkj");
+   
+   radio.write(&navigationData, sizeof(navigationData));
 
 } 

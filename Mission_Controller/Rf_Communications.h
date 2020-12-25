@@ -6,7 +6,13 @@
  */
 
 #ifndef _RF_COMMS_H    
-#define _RF_COMMS_H    
+#define _RF_COMMS_H   
+
+
+//constants
+
+#define TX_MODE 44
+#define RX_MODE 69
 
 //function delarations 
 

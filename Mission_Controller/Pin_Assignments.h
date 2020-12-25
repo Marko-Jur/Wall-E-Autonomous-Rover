@@ -23,8 +23,8 @@
  //MOSI 11
  //MISO 12
  //SCK 13
- #define CE 4
- #define CSN 5
+ #define CE 9
+ #define CSN 10
 
   //Serial port assignments:
  #define GPS_SERIAL Serial1 //Rx --> 0, Tx --> 1
