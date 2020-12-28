@@ -8,11 +8,14 @@
 Adafruit_GPS GPS(&GPSSerial);
 
 const float EARTH_RAD =  6371000.0;
+const float EARTH_CIRCUMFERENCE = 40030170.0;
 float current_time = 0;
 float latitude_min, longitude_min, bearing, heading, current_latitude, current_longitude, h_a, h_c, distance_x;
 
-float d_latitude = 49.264737;
-float d_longitude = -123.253086;
+float d_latitude = 49.264714;
+float d_longitude = -123.252865;
+
+//Actual distance is 186.32 meters
 
 // Set GPSECHO to 'false' to turn off echoing the GPS data to the Serial console
 // Set to 'true' if you want to debug and listen to the raw GPS sentences
@@ -111,7 +114,9 @@ void gpsData(float gps_data[7]) // run over and over again
   float temp_longitude = gps_data[3] = (GPS.longitude)/100;
   int integer_longitude = int(temp_longitude);
   float decimal_longitude = ((temp_longitude - integer_longitude)*100)/60;
-  float actual_longitude = integer_longitude + decimal_longitude;
+  float actual_longitude = -(integer_longitude + decimal_longitude);
+
+ 
   
 
   gps_data[0] = int(GPS.fix);
@@ -121,12 +126,35 @@ void gpsData(float gps_data[7]) // run over and over again
   gps_data[6] = (GPS.speed) * 0.514444; //Converting knows to m/s
 
   //Distance Calculations:
-    h_a = sin((d_latitude - actual_latitude)/2) * sin((d_latitude - actual_latitude)/2) + cos(actual_latitude) * cos(d_latitude) * sin((d_longitude - actual_longitude)/2) * sin((d_longitude - actual_longitude)/2);
-    h_c = 2 * atan2(sqrt(h_a), sqrt(1-h_a));
-    distance_x = h_c * EARTH_RAD;
-    bearing = atan2((d_latitude - actual_latitude),(d_longitude - actual_longitude)) * (180/PI);
+  float distLat = abs(d_latitude - actual_latitude) * 111194.9;
+  float distLong = 111194.9 * abs(d_longitude - actual_longitude) * cos(radians((d_latitude + actual_latitude) / 2));
+  distance_x = sqrt(pow(distLat, 2) + pow(distLong, 2));
 
-    gps_data[4] = distance_x;
-    gps_data[5] = bearing;
+  //Bearing calculations:
+  float teta1 = radians(actual_latitude);
+  float teta2 = radians(d_latitude);
+  float delta1 = radians(d_latitude-actual_latitude);
+  float delta2 = radians(d_longitude-actual_longitude);
+
+  //==================Heading Formula Calculation================//
+
+  float y = sin(delta2) * cos(teta2);
+  float x = cos(teta1)*sin(teta2) - sin(teta1)*cos(teta2)*cos(delta2);
+  float brng = atan2(y,x);
+  brng = degrees(brng);// radians to degrees
+  bearing = ( ((int)brng + 360) % 360 ); 
+
+  
+  
+  /*
+  h_a = sin((d_latitude - actual_latitude)/2) * sin((d_latitude - actual_latitude)/2) + cos(actual_latitude) * cos(d_latitude) * sin((d_longitude - actual_longitude)/2) * sin((d_longitude - actual_longitude)/2);
+  h_c = 2 * atan2(sqrt(h_a), sqrt(1-h_a));
+  distance_x = (h_c * EARTH_RAD);
+  */
+  //bearing = atan2((d_latitude - actual_latitude),(d_longitude - actual_longitude)) * (180/PI);
+  
+
+  gps_data[4] = distance_x;
+  gps_data[5] = bearing;
 
 }

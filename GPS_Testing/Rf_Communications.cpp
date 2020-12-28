@@ -84,7 +84,7 @@ void sendDataRf(float gps_data[7]) {
   send_data[6] = (gps_data[6]);
   send_data[7] = (gps_data[7]);
   
-  if (millis()-time_a > 10){
+  if (millis()-time_a > 100){
     radio.write(&send_data, sizeof(send_data));
     time_a = millis();
   }

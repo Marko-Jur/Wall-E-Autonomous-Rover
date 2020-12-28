@@ -13,9 +13,10 @@ float gps_data[7] = {1.00,0.00,0.00,0.00,0.00,0.00,0.00}; //Fix,Satellites, Lati
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(9600);
+  Serial.begin(115200);
   
   setupGps();
+  Serial.println("Howzit");
   setupRfCommunications(0);
   /*
   radio.begin();
@@ -30,7 +31,6 @@ void loop() {
 
   gpsData(gps_data);
 
-  
   Serial.print("Fix: ");Serial.print(gps_data[0]);Serial.print("\t");
   Serial.print("Sat: ");Serial.print(gps_data[1]);Serial.print("\t");
   Serial.print("Lat: ");Serial.print(gps_data[2],6);Serial.print("\t");
@@ -43,7 +43,7 @@ void loop() {
 
 
   //if (millis()-time_a > 10){
-    sendDataRf(gps_data);
+    //sendDataRf(gps_data);
    // time_a=millis();
   //
   
