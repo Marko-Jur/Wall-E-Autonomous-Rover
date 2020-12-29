@@ -14,7 +14,8 @@
 #include "Motor_Controller.h"
 
 //Defining Globals
-float target_data[2]= {49.264714,-123.252865};
+float target_data[2]= {49.263297,-123.257949}; // Tennis Court
+//float target_data[2]= {49.263572,-123.257980}; //Stairs
 float navigation_data[8] = {1.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00}; //Fix,Satellites, Latitude, Longitude,distance bearing, speed, Heading
 
 //Timer test:
