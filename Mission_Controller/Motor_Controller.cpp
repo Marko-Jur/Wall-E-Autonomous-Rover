@@ -16,8 +16,6 @@
 #define ACCEPTABLE_RANGE 1.00
 #define TERMINATE_DISTANCE 1.00
 
-//Variables
-int encoder_a_a_position = 0;
 
 void motorSetup(){
 
@@ -30,14 +28,7 @@ void motorSetup(){
  pinMode(LEFT_MOTOR_B, OUTPUT);
  pinMode(LEFT_MOTOR_ENABLE, OUTPUT);
 
- //Setting up Encoder pins
- //pinMode(ENCODER_A_A, INPUT);
- //pinMode(ENCODER_A_B,INPUT);
 
- //Setting initial encoder values to 0
- encoder_a_a_position = 0;
-
- 
  //Setup Motor Directions:
  digitalWrite(RIGHT_MOTOR_A,HIGH);
  digitalWrite(RIGHT_MOTOR_B,LOW);
@@ -51,7 +42,7 @@ void motorSetup(){
 void motorController(float bearing, float heading, float distance){
 
 	//PID constants
-	float motor_KP = 1.00;
+	float motor_KP = 0.15;
 	float motor_KI = 0.00;
 	float motor_KD = 0.00;
 
@@ -116,10 +107,11 @@ if (distance > TERMINATE_DISTANCE){
     analogWrite(LEFT_MOTOR_ENABLE, left_motor_value);
     
  }
- 
+  /*
 	  Serial.print("Error = "); Serial.print(direction_error);Serial.print("\t");
     Serial.print("Right motor value = ");Serial.print(right_motor_value);Serial.print("\t");
     Serial.print("Left motor value = "); Serial.print(left_motor_value);Serial.print("\t");
+    */
 }
 
 else{
@@ -127,12 +119,4 @@ else{
     analogWrite(LEFT_MOTOR_ENABLE, 0);
 }
 
-}
-
-
-void encoderRead(){
-
-//encoder_a_a_position += digitalRead(ENCODER_A_A);
-//Serial.println(encoder_a_a_position);
-  
 }

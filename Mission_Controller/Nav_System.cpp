@@ -1,13 +1,19 @@
 #include "Wall-E_Libraries.h"
 #include "Pin_Assignments.h"
 #include "Nav_System.h"
+#include "Rf_communications.h"
 
 //constants:
 
-#define GPSECHO true
+#define GPSECHO false
 #define EARTH_RAD 6371000.0
 #define MAGNETIC_DECLINATION 16.1
 #define IMU_CALIBRATION_ROUNDS 3000
+
+#define GPSSerial Serial1
+Adafruit_GPS GPS(&GPSSerial);
+
+const float EARTH_CIRCUMFERENCE = 40030170.0;
 
 
 //variables:
@@ -31,29 +37,52 @@ sensors_event_t orientationData , angVelocityData , linearAccelData, magnetomete
 //function calls:
 
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
-Adafruit_GPS GPS(&GPS_SERIAL);
+
 
 void setupNav() {
   bno.begin();
-  
-  GPS.begin(9600);  
-  GPS_SERIAL.begin(9600);
-  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
-  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);   // Do not exceed 1 Hz update rate
-  //GPS.sendCommand(PGCMD_ANTENNA);
-  GPS_SERIAL.println(PMTK_Q_RELEASE); 
-
   current_time = millis();
+  
+  //GPS Setup
+  
+  //while (!Serial);  // uncomment to have the sketch wait until Serial is ready
+
+  // connect at 115200 so we can read the GPS fast enough and echo without dropping chars
+  // also spit it out
+  
+  Serial.println("Adafruit GPS library basic test!");
+
+  // 9600 NMEA is the default baud rate for Adafruit MTK GPS's- some use 4800
+  GPS.begin(9600);
+  // uncomment this line to turn on RMC (recommended minimum) and GGA (fix data) including altitude
+  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
+  // uncomment this line to turn on only the "minimum recommended" data
+  //GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY);
+  // For parsing data, we don't suggest using anything but either RMC only or RMC+GGA since
+  // the parser doesn't care about other sentences at this time
+  // Set the update rate
+  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ); // 1 Hz update rate
+  // For the parsing code to work nicely and have time to sort thru the data, and
+  // print it out we don't suggest using anything higher than 1 Hz
+
+  // Request updates on antenna status, comment out to keep quiet
+  GPS.sendCommand(PGCMD_ANTENNA);
+
+  delay(1000);
+
+  // Ask for firmware version
+  GPSSerial.println(PMTK_Q_RELEASE);
 }
 
-void navSystem(float d_latitude, float d_longitude, float *return_vals) {
+void navSystem(float d_latitude, float d_longitude, float return_vals[8]) {
   /* return_vals[0] --> c_latitude 
    * return_vals[1] --> c_longitude 
    * return_vals[2] --> distance
    * return_vals[3] --> bearing
    * return_vals[4] --> heading 
    */
-  
+  //Runnining on a timer:
+  if (millis() - current_time > 20){
   bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
   bno.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
   bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
@@ -84,68 +113,69 @@ void navSystem(float d_latitude, float d_longitude, float *return_vals) {
   if (heading > 180)
     heading -= 360;
 
-  Serial.println(heading);
-
-  return_vals[4] = heading;
-  return_vals[3] = 0;
-  return_vals[2] = 9001;
-  /*
-  Serial.print(orientationData.orientation.x);
-  Serial.print(" | ");
-  Serial.print(orientationData.orientation.y);
-  Serial.print(" | ");
-  Serial.print(orientationData.orientation.z);
-  Serial.println(" | ");*/
+  //Serial.println(heading);
+  current_time = millis();
   
-
-  /*
-  int8_t boardTemp = bno.getTemp();
-  uint8_t system, gyro, accel, mag = 0;
-  bno.getCalibration(&system, &gyro, &accel, &mag);
-  */
+  return_vals[7] = heading;
   
-   /*
-   GPS.read();
-   if (GPS.newNMEAreceived()) {
-    if (!GPS.parse(GPS.lastNMEA()))   // also sets newNMEAreceived flag to false
-      return;  
-   } 
-   
-   if((millis() - current_time) > 1000){
-    current_time = millis();  
-    
-    Serial.print("Fix: "); Serial.print((int)GPS.fix);
-    Serial.print("| quality: "); Serial.print((int)GPS.fixquality);
+  }
 
-    current_latitude = ((int)(GPS.latitude/100.0));
-    latitude_min = (current_latitude*(-100)+(float)GPS.latitude);
-    current_latitude = ((float)current_latitude + latitude_min/60.0) * (PI/180);
 
-    current_longitude = ((int)(GPS.longitude/100.0));
-    longitude_min = (current_longitude*(-100)+(float)GPS.longitude);
-    current_longitude = ((float)(current_longitude) + longitude_min/60.0) * (-PI/180);
-        
-    h_a = sin((d_latitude - current_latitude)/2) * sin((d_latitude - current_latitude)/2) + cos(current_latitude) * cos(d_latitude) * sin((d_longitude - current_longitude)/2) * sin((d_longitude - current_longitude)/2);
-    h_c = 2 * atan2(sqrt(h_a), sqrt(1-h_a));
-    distance_x = h_c * EARTH_RAD;
-    bearing = atan2((d_latitude - current_latitude),(d_longitude - current_longitude)) * (180/PI);
+  //GPS Stuff:////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // read data from the GPS in the 'main loop'
+  char c = GPS.read();
+  
+  // if you want to debug, this is a good time to do it!
+  if (GPSECHO)
+    if (c) Serial.print(c);
+  // if a sentence is received, we can check the checksum, parse it...
+  if (GPS.newNMEAreceived()) {
+    // a tricky thing here is if we print the NMEA sentence, or data
+    // we end up not listening and catching other sentences!
+    // so be very wary if using OUTPUT_ALLDATA and trying to print out data
+    Serial.println(GPS.lastNMEA()); // this also sets the newNMEAreceived() flag to false
+    if (!GPS.parse(GPS.lastNMEA())) // this also sets the newNMEAreceived() flag to false
+      return; // we can fail to parse a sentence in which case we should just wait for another
+  }
 
-    
-    Serial.print(" | lat:");
-    Serial.print(current_latitude * (180/PI), 5);
-    return_vals[0] = current_latitude * (180/PI);
-    Serial.print(" | long:");
-    Serial.print(current_longitude * (180/PI), 5);
-    return_vals[1] = current_longitude * (180/PI);
-    Serial.print(" | b:");
-    Serial.print(bearing);
-    return_vals[3] = bearing;
-    Serial.print(" | h:");
-    Serial.print(heading);
-    return_vals[4] = heading;
-    Serial.print(" | dist:");
-    Serial.println(distance_x);
-    return_vals[2] = distance_x;
-   }
-  */
+  //Actual latitude calculations:
+  float temp_latitude = return_vals[2] = (GPS.latitude)/100;
+  int integer_latitude = int(temp_latitude);
+  float decimal_latitude = ((temp_latitude - integer_latitude)*100)/60;
+  float actual_latitude = integer_latitude + decimal_latitude;
+
+  //actual Longitude calculations:
+  float temp_longitude = return_vals[3] = (GPS.longitude)/100;
+  int integer_longitude = int(temp_longitude);
+  float decimal_longitude = ((temp_longitude - integer_longitude)*100)/60;
+  float actual_longitude = -(integer_longitude + decimal_longitude);
+  
+  return_vals[0] = int(GPS.fix);
+  return_vals[1] = (GPS.satellites);
+  return_vals[2] = actual_latitude;
+  return_vals[3] = -actual_longitude;
+  return_vals[6] = (GPS.speed) * 0.514444; //Converting knows to m/s
+
+  //Distance Calculations:
+  float distLat = abs(d_latitude - actual_latitude) * 111194.9;
+  float distLong = 111194.9 * abs(d_longitude - actual_longitude) * cos(radians((d_latitude + actual_latitude) / 2));
+  distance_x = sqrt(pow(distLat, 2) + pow(distLong, 2));
+
+  //Bearing calculations:
+  float teta1 = radians(actual_latitude);
+  float teta2 = radians(d_latitude);
+  float delta1 = radians(d_latitude-actual_latitude);
+  float delta2 = radians(d_longitude-actual_longitude);
+
+  //==================Heading Formula Calculation================//
+
+  float y = sin(delta2) * cos(teta2);
+  float x = cos(teta1)*sin(teta2) - sin(teta1)*cos(teta2)*cos(delta2);
+  float brng = atan2(y,x);
+  brng = degrees(brng);// radians to degrees
+  bearing = ( ((int)brng + 360) % 360 ); 
+
+  return_vals[4] = distance_x;
+  return_vals[5] = bearing;
+ 
 }

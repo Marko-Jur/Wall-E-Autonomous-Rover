@@ -13,17 +13,23 @@
 //variables 
 const byte address[6] = "00001";
 
+//The array that we send
+float send_data[8] = {1.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00};
+
+//Setting up Timer to allow the transmitter enough time
+uint32_t time_a = millis();
+
 //function calls
 
 RF24 radio(CE, CSN); // CE, CSN
 
 void setupRfCommunications(int mode){
 
-  radio.begin();
+  
   //Setting up RF as a receiver
   if (mode == RX_MODE){
 
-    
+    radio.begin();
     radio.openReadingPipe(0, address);
     radio.setPALevel(RF24_PA_MIN);
     radio.startListening();
@@ -32,11 +38,13 @@ void setupRfCommunications(int mode){
 
   //Setting up RF as a transmitter
   else{
- 
+      radio.begin();
       radio.openWritingPipe(address);
       radio.setPALevel(RF24_PA_MIN);
       radio.stopListening();
   }
+
+  
 
 }
 
@@ -68,9 +76,22 @@ void initializeTarget(float *target_data){
  * 
  * Purpose: Sends Wall-E data via RF to the GUI
  */
-void sendDataRf(float * navigationData) {
+void sendDataRf(float navigation_data[8]) {
 
    
-   radio.write(&navigationData, sizeof(navigationData));
+  send_data[0] = (navigation_data[0]);
+  send_data[1] = (navigation_data[1]);
+  send_data[2] = (navigation_data[2]);
+  send_data[3] = (navigation_data[3]);
+  send_data[4] = (navigation_data[4]);
+  send_data[5] = (navigation_data[5]);
+  send_data[6] = (navigation_data[6]);
+  send_data[7] = (navigation_data[7]);
+  send_data[8] = (navigation_data[8]);
+  
+  if (millis()-time_a > 10){
+    radio.write(&send_data, sizeof(send_data));
+    time_a = millis();
+  }
 
 } 

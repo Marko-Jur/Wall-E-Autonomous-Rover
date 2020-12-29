@@ -18,7 +18,7 @@
 
 void setupRfCommunications(int mode);
 void initializeTarget(float targetData[]);
-void sendDataRf(float navigationData[]);
+void sendDataRf(float navigation_data[8]);
 
 
 
