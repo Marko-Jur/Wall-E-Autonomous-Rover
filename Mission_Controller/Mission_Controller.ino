@@ -17,6 +17,9 @@
 float target_data[2]= {49.264714,-123.252865};
 float navigation_data[8] = {1.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00}; //Fix,Satellites, Latitude, Longitude,distance bearing, speed, Heading
 
+//Timer test:
+
+
 void setup(){
 
     //Initializae Serial port for debugging
@@ -30,6 +33,8 @@ void setup(){
     motorSetup();
 
     setupRfCommunications(TX_MODE); //Pass in 0 to set it up as a transmitter
+
+    delay(20000);
 
 
 }
@@ -50,7 +55,9 @@ void loop()
   Serial.print("Speed: ");Serial.print(navigation_data[6],4);Serial.print("\t");
   Serial.println("");
   
+  
+  
   //sendDataRf(navigation_data);
   
-  //motorController(navigation_data[5],navigation_data[7],navigation_data[4]);
+  motorController(navigation_data[5],navigation_data[7],navigation_data[4]);
 }

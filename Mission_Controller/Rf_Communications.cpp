@@ -89,9 +89,9 @@ void sendDataRf(float navigation_data[8]) {
   send_data[7] = (navigation_data[7]);
   send_data[8] = (navigation_data[8]);
   
-  if (millis()-time_a > 10){
+  //if (millis()-time_a > 10){
     radio.write(&send_data, sizeof(send_data));
-    time_a = millis();
-  }
+   // time_a = millis();
+  //}
 
 } 
