@@ -53,8 +53,7 @@ void loop()
   Serial.print("Lon: ");Serial.print(navigation_data[3],6);Serial.print("\t");
   Serial.print("Distance: ");Serial.print(navigation_data[4]);Serial.print("\t");
   Serial.print("bearing: ");Serial.print(navigation_data[5]);Serial.print("\t");
-  Serial.print("heading: ");Serial.print(navigation_data[7]);Serial.print("\t");
-  Serial.print("Speed: ");Serial.print(navigation_data[6],4);Serial.print("\t");
+  Serial.print("heading: ");Serial.print(navigation_data[6]);Serial.print("\t");
   Serial.println("");
   
   

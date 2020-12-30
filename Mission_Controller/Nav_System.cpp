@@ -1,7 +1,6 @@
 #include "Wall-E_Libraries.h"
 #include "Pin_Assignments.h"
 #include "Nav_System.h"
-#include "Rf_communications.h"
 
 //constants:
 
@@ -24,7 +23,7 @@ const float EARTH_CIRCUMFERENCE = 40030170.0;
 uint16_t BNO055_SAMPLERATE_DELAY_uS = 20000;
 
 float current_time = 0;
-float latitude_min, longitude_min, bearing, heading, global_heading, current_latitude, current_longitude, h_a, h_c, distance_x;
+float latitude_min, longitude_min, bearing, heading, current_latitude, current_longitude, h_a, h_c, distance_x;
 float roll, pitch, yaw;
 float currentTime, prevTime, elapsedTime;
  
