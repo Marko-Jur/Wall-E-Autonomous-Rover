@@ -11,17 +11,20 @@
 #define IMU_CALIBRATION_ROUNDS 3000
 
 #define GPSSerial Serial1
+
+
 Adafruit_GPS GPS(&GPSSerial);
+IntervalTimer readIMU;
 
 const float EARTH_CIRCUMFERENCE = 40030170.0;
 
 
 //variables:
 
-uint16_t BNO055_SAMPLERATE_DELAY_MS = 100;
+uint16_t BNO055_SAMPLERATE_DELAY_uS = 20000;
 
 float current_time = 0;
-float latitude_min, longitude_min, bearing, heading, current_latitude, current_longitude, h_a, h_c, distance_x;
+float latitude_min, longitude_min, bearing, heading, global_heading, current_latitude, current_longitude, h_a, h_c, distance_x;
 float roll, pitch, yaw;
 float currentTime, prevTime, elapsedTime;
  
@@ -41,7 +44,7 @@ Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
 void setupNav() {
   bno.begin();
-  current_time = millis();
+
   
   //GPS Setup
   
@@ -72,66 +75,30 @@ void setupNav() {
 
   // Ask for firmware version
   GPSSerial.println(PMTK_Q_RELEASE);
+
+  readIMU.begin(getHeading, BNO055_SAMPLERATE_DELAY_uS);
 }
 
-void navSystem(float d_latitude, float d_longitude, float return_vals[8]) {
-  /* return_vals[0] --> c_latitude 
-   * return_vals[1] --> c_longitude 
-   * return_vals[2] --> distance
-   * return_vals[3] --> bearing
-   * return_vals[4] --> heading 
+void navSystem(float d_latitude, float d_longitude, float return_vals[7]) {
+  /* return_vals[0] --> fix
+   * return_vals[1] --> satellites
+   * return_vals[2] --> c_latitude 
+   * return_vals[3] --> c_longitude 
+   * return_vals[4] --> distance
+   * return_vals[5] --> bearing
+   * return_vals[6] --> heading 
    */
-  //Runnining on a timer:
-  if (millis() - current_time > 20){
-  bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
-  bno.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
-  bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
-  bno.getEvent(&magnetometerData, Adafruit_BNO055::VECTOR_MAGNETOMETER);
-  bno.getEvent(&accelerometerData, Adafruit_BNO055::VECTOR_ACCELEROMETER);
-  bno.getEvent(&gravityData, Adafruit_BNO055::VECTOR_GRAVITY);
-
-  acc_x = accelerometerData.acceleration.x;
-  acc_y = accelerometerData.acceleration.y;
-  acc_z = accelerometerData.acceleration.z;
-
-  gyro_x = angVelocityData.gyro.x;
-  gyro_x = angVelocityData.gyro.x;
-  gyro_x = angVelocityData.gyro.x;
-
-  mag_x = magnetometerData.magnetic.x;
-  mag_y = magnetometerData.magnetic.y;
-  mag_z = magnetometerData.magnetic.z;
   
-  pitch = orientationData.orientation.y * (PI/180) ;
-  roll  = orientationData.orientation.z * (PI/180) ;
-  yaw   = orientationData.orientation.x * (PI/180) ;
 
-  mag_x_proj = mag_x * cos(pitch) + mag_y * sin(roll)*sin(pitch) - mag_z*cos(roll)*sin(pitch); //tilt-compensation 
-  mag_y_proj = mag_y * cos(roll) + mag_z * sin(roll);
-
-  heading = atan2(mag_y_proj, mag_x_proj) * (180/PI) + MAGNETIC_DECLINATION; //heading with corrected declination
-  if (heading > 180)
-    heading -= 360;
-
-  //Serial.println(heading);
-  current_time = millis();
-  
-  return_vals[7] = heading;
-  
-  }
-
+  return_vals[6] = heading;
 
   //GPS Stuff:////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // read data from the GPS in the 'main loop'
-  char c = GPS.read();
-  
-  // if you want to debug, this is a good time to do it!
-  if (GPSECHO)
-    if (c) Serial.print(c);
+  GPS.read();
   // if a sentence is received, we can check the checksum, parse it...
   if (GPS.newNMEAreceived()) {
     // a tricky thing here is if we print the NMEA sentence, or data
-    // we end up not listening and catching other sentences!
+    // we end up not listening and catching other sentences
     // so be very wary if using OUTPUT_ALLDATA and trying to print out data
     Serial.println(GPS.lastNMEA()); // this also sets the newNMEAreceived() flag to false
     if (!GPS.parse(GPS.lastNMEA())) // this also sets the newNMEAreceived() flag to false
@@ -154,7 +121,6 @@ void navSystem(float d_latitude, float d_longitude, float return_vals[8]) {
   return_vals[1] = (GPS.satellites);
   return_vals[2] = actual_latitude;
   return_vals[3] = -actual_longitude;
-  return_vals[6] = (GPS.speed) * 0.514444; //Converting knows to m/s
 
   //Distance Calculations:
   float distLat = abs(d_latitude - actual_latitude) * 111194.9;
@@ -182,4 +148,36 @@ void navSystem(float d_latitude, float d_longitude, float return_vals[8]) {
   return_vals[4] = distance_x;
   return_vals[5] = bearing;
  
+}
+
+void getHeading() {
+    bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
+    bno.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
+    bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
+    bno.getEvent(&magnetometerData, Adafruit_BNO055::VECTOR_MAGNETOMETER);
+    bno.getEvent(&accelerometerData, Adafruit_BNO055::VECTOR_ACCELEROMETER);
+    bno.getEvent(&gravityData, Adafruit_BNO055::VECTOR_GRAVITY);
+  
+    acc_x = accelerometerData.acceleration.x;
+    acc_y = accelerometerData.acceleration.y;
+    acc_z = accelerometerData.acceleration.z;
+  
+    gyro_x = angVelocityData.gyro.x;
+    gyro_x = angVelocityData.gyro.x;
+    gyro_x = angVelocityData.gyro.x;
+  
+    mag_x = magnetometerData.magnetic.x;
+    mag_y = magnetometerData.magnetic.y;
+    mag_z = magnetometerData.magnetic.z;
+    
+    pitch = orientationData.orientation.y * (PI/180) ;
+    roll  = orientationData.orientation.z * (PI/180) ;
+    yaw   = orientationData.orientation.x * (PI/180) ;
+  
+    mag_x_proj = mag_x * cos(pitch) + mag_y * sin(roll)*sin(pitch) - mag_z*cos(roll)*sin(pitch); //tilt-compensation 
+    mag_y_proj = mag_y * cos(roll) + mag_z * sin(roll);
+  
+    heading = atan2(mag_y_proj, mag_x_proj) * (180/PI) + MAGNETIC_DECLINATION; //heading with corrected declination
+    if (heading > 180)
+      heading -= 360;  
 }
