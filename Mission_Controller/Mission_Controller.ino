@@ -14,8 +14,9 @@
 #include "Motor_Controller.h"
 
 //Defining Globals
-float target_data[2]= {49.263297,-123.257949}; // Tennis Court
-//float target_data[2]= {49.263572,-123.257980}; //Stairs
+//float target_data[2]= {49.263297,-123.257949}; // Tennis Court
+float target_data[2]= {49.263596,-123.258728}; //Stairs
+//float target_data[2]= {49.263572,-123.257980}; //float target_data[2]= {49.263596,-123.258728}; //
 float navigation_data[8] = {1.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00}; //Fix,Satellites, Latitude, Longitude,distance bearing, speed, Heading
 
 //Timer test:
@@ -35,7 +36,7 @@ void setup(){
 
     setupRfCommunications(TX_MODE); //Pass in 0 to set it up as a transmitter
 
-    delay(20000);
+    delay(50000);
 
 
 }

@@ -175,6 +175,10 @@ void navSystem(float d_latitude, float d_longitude, float return_vals[8]) {
   brng = degrees(brng);// radians to degrees
   bearing = ( ((int)brng + 360) % 360 ); 
 
+  if (bearing > 180){
+    bearing -= 360;
+  }
+
   return_vals[4] = distance_x;
   return_vals[5] = bearing;
  
