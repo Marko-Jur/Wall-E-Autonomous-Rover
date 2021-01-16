@@ -35,6 +35,50 @@ Adafruit_GPS GPS(&GPS_SERIAL);
 
 void setupNav() {
   bno.begin();
+
+  Serial.println("Begining hard iron calibration...");
+  while((((max_x - min_x)/2) <25 || ((max_x - min_x)/2) >65) ||
+        (((max_y - min_y)/2) <25 || ((max_y - min_y)/2) >65) ||
+        (((max_z - min_z)/2) <25 || ((max_z - min_z)/2) >65) ||
+        abs(((max_x - min_x)/2) - ((max_y - min_y)/2))  > 4  ||
+        abs(((max_x - min_x)/2) - ((max_z - min_z)/2))  > 4  ||
+        abs(((max_z - min_z)/2) - ((max_y - min_y)/2))  > 4) {
+
+    bno.getEvent(&magnetometerData, Adafruit_BNO055::VECTOR_MAGNETOMETER);
+
+    mag_x = magnetometerData.magnetic.x;
+    mag_y = magnetometerData.magnetic.y;
+    mag_z = magnetometerData.magnetic.z;
+
+    min_x = min(min_x, mag_x);
+    min_y = min(min_y, mag_y);
+    min_z = min(min_z, mag_z);
+  
+    max_x = max(max_x, mag_x);
+    max_y = max(max_y, mag_y);
+    max_z = max(max_z, mag_z);
+  
+    mid_x = (max_x + min_x) / 2;
+    mid_y = (max_y + min_y) / 2;
+    mid_z = (max_z + min_z) / 2;
+
+    Serial.print(" Hard offset: (");
+    Serial.print(mid_x); Serial.print(", ");
+    Serial.print(mid_y); Serial.print(", ");
+    Serial.print(mid_z); Serial.print(")");  
+  
+    Serial.print(" Field: (");
+    Serial.print((max_x - min_x)/2); Serial.print(", ");
+    Serial.print((max_y - min_y)/2); Serial.print(", ");
+    Serial.print((max_z - min_z)/2); Serial.print(")");   
+
+    Serial.print(" Raw: (");
+    Serial.print(mag_x); Serial.print(", ");
+    Serial.print(mag_y); Serial.print(", ");
+    Serial.print(mag_z); Serial.println(")");
+    
+    delay(500);
+  }
   
   GPS.begin(9600);  
   GPS_SERIAL.begin(9600);
@@ -69,9 +113,9 @@ void navSystem(float d_latitude, float d_longitude, float *return_vals) {
   gyro_x = angVelocityData.gyro.x;
   gyro_x = angVelocityData.gyro.x;
 
-  mag_x = magnetometerData.magnetic.x;
-  mag_y = magnetometerData.magnetic.y;
-  mag_z = magnetometerData.magnetic.z;
+  mag_x = magnetometerData.magnetic.x - mid_x;
+  mag_y = magnetometerData.magnetic.y - mid_y;
+  mag_z = magnetometerData.magnetic.z - mid_z;
   
   pitch = orientationData.orientation.y * (PI/180) ;
   roll  = orientationData.orientation.z * (PI/180) ;
@@ -103,7 +147,7 @@ void navSystem(float d_latitude, float d_longitude, float *return_vals) {
   bno.getCalibration(&system, &gyro, &accel, &mag);
   
   
-   
+   /*
    GPS.read();
    if (GPS.newNMEAreceived()) {
     if (!GPS.parse(GPS.lastNMEA()))   // also sets newNMEAreceived flag to false
@@ -145,5 +189,5 @@ void navSystem(float d_latitude, float d_longitude, float *return_vals) {
     Serial.print(" | dist:");
     Serial.println(distance_x);
     return_vals[2] = distance_x;
-   }
+   }*/
 }
