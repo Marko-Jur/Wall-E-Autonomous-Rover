@@ -44,10 +44,6 @@ void setup(){
     //Setup RC Transmitter
     rcSetup();
 
-    //Adding RF Thread
-    //threads.addThread(sendDataRf, 1);
-
-    //delay(50000);
     
 }
 
