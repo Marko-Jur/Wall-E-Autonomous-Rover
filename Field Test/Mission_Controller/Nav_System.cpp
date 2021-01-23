@@ -230,18 +230,5 @@ void getHeading() {
     heading = atan2(mag_y_proj, mag_x_proj) * (180/PI) + MAGNETIC_DECLINATION; //heading with corrected declination
     if (heading > 180)
       heading -= 360;  
-
-    avg_heading[count] = heading;
-    count++;
-
-    if (count > 100){
-      count = 1;
-    }
-
-    for (int i = 0; i <= count; i++){
-      heading += avg_heading[i];
-    }
-
-    heading = heading/count;
       
 }
