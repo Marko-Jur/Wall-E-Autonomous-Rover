@@ -31,17 +31,19 @@
 
  
  //Motor Pins:
- #define RIGHT_MOTOR_A 2
- #define RIGHT_MOTOR_B 3
- #define RIGHT_MOTOR_ENABLE 14
+ #define RIGHT_MOTOR_A 4//2
+ #define RIGHT_MOTOR_B 5//3
+ #define RIGHT_MOTOR_ENABLE 15//14
 
- #define LEFT_MOTOR_A 4
- #define LEFT_MOTOR_B 5
- #define LEFT_MOTOR_ENABLE 15
+ #define LEFT_MOTOR_A 2//4
+ #define LEFT_MOTOR_B 3//5
+ #define LEFT_MOTOR_ENABLE 14//14
 
 //RC Pins
 #define RCRX 6
 
+//Servo Pins
+#define SERVO 7
 
 
 #endif

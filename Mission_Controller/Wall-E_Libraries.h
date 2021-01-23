@@ -11,6 +11,7 @@
 //RF Libraries
 #include <nRF24L01.h>
 #include <RF24.h>
+#include <SPI.h> 
 
 //BN0055 Libraries:
 
@@ -23,6 +24,16 @@
 
 #include <Adafruit_GPS.h>
 #include <SoftwareSerial.h>
+
+//PPM Transmitter Libraries:
+#include <PulsePosition.h>
+
+//Multi-threading library:
+#include <Arduino.h>
+#include "TeensyThreads.h"
+
+//Servo library
+#include <Servo.h>
 
 
 #endif

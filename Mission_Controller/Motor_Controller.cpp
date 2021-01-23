@@ -1,10 +1,9 @@
 /*Function: Motor Controller
  *Author: Marko Jurisic
- *Input Parameters: Bearing, Heading
+ *Input Parameters: Distance, Bearing, Heading, 
  *Output Parameters: None
  *
- *Purpose: Initializes Wall-E with the target location from the GCS, and then Wall-E begins driving to the location while reporting it's
- *         poisitional data to the GCS
+ *Purpose: Makes Wall-E drive to the target location
  */
 
 #include "Wall-E_Libraries.h"
@@ -12,9 +11,9 @@
 #include "Motor_Controller.h"
 
 //constants
-#define MAX_SPEED 240 //The max speed Wall-E can go too
-#define ACCEPTABLE_RANGE 1.00
-#define TERMINATE_DISTANCE 1.00
+#define MAX_SPEED 240 //The max speed Wall-E can go to
+#define ACCEPTABLE_RANGE  2.00
+#define TERMINATE_DISTANCE 2.5
 
 
 void motorSetup(){
@@ -107,10 +106,12 @@ if (distance > TERMINATE_DISTANCE){
     analogWrite(LEFT_MOTOR_ENABLE, left_motor_value);
     
  }
-  /*
+    /*
 	  Serial.print("Error = "); Serial.print(direction_error);Serial.print("\t");
     Serial.print("Right motor value = ");Serial.print(right_motor_value);Serial.print("\t");
     Serial.print("Left motor value = "); Serial.print(left_motor_value);Serial.print("\t");
+    Serial.println("");
+    delay(1);
     */
 }
 

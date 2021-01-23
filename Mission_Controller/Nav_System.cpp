@@ -16,11 +16,12 @@ Adafruit_GPS GPS(&GPSSerial);
 IntervalTimer readIMU;
 
 const float EARTH_CIRCUMFERENCE = 40030170.0;
-
+float avg_heading[1000]= {};
+int count = 1;
 
 //variables:
 
-uint16_t BNO055_SAMPLERATE_DELAY_uS = 20000;
+uint16_t BNO055_SAMPLERATE_DELAY_uS = 10000;
 
 float current_time = 0;
 float latitude_min, longitude_min, bearing, heading, current_latitude, current_longitude, h_a, h_c, distance_x;
@@ -44,6 +45,57 @@ Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 void setupNav() {
   bno.begin();
 
+  //Calbirating the BN0055. Comment 
+/*  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+   Serial.println("Begining hard iron calibration...");
+  while((((max_x - min_x)/2) <25 || ((max_x - min_x)/2) >65) ||
+        (((max_y - min_y)/2) <25 || ((max_y - min_y)/2) >65) ||
+        (((max_z - min_z)/2) <25 || ((max_z - min_z)/2) >65) ||
+        abs(((max_x - min_x)/2) - ((max_y - min_y)/2))  > 4  ||
+        abs(((max_x - min_x)/2) - ((max_z - min_z)/2))  > 4  ||
+        abs(((max_z - min_z)/2) - ((max_y - min_y)/2))  > 4) {
+
+    bno.getEvent(&magnetometerData, Adafruit_BNO055::VECTOR_MAGNETOMETER);
+
+    mag_x = magnetometerData.magnetic.x;
+    mag_y = magnetometerData.magnetic.y;
+    mag_z = magnetometerData.magnetic.z;
+
+    min_x = min(min_x, mag_x);
+    min_y = min(min_y, mag_y);
+    min_z = min(min_z, mag_z);
+  
+    max_x = max(max_x, mag_x);
+    max_y = max(max_y, mag_y);
+    max_z = max(max_z, mag_z);
+  
+    mid_x = (max_x + min_x) / 2;
+    mid_y = (max_y + min_y) / 2;
+    mid_z = (max_z + min_z) / 2;
+
+    Serial.print(" Hard offset: (");
+    Serial.print(mid_x); Serial.print(", ");
+    Serial.print(mid_y); Serial.print(", ");
+    Serial.print(mid_z); Serial.print(")");  
+  
+    Serial.print(" Field: (");
+    Serial.print((max_x - min_x)/2); Serial.print(", ");
+    Serial.print((max_y - min_y)/2); Serial.print(", ");
+    Serial.print((max_z - min_z)/2); Serial.print(")");   
+
+    Serial.print(" Raw: (");
+    Serial.print(mag_x); Serial.print(", ");
+    Serial.print(mag_y); Serial.print(", ");
+    Serial.print(mag_z); Serial.println(")");
+    
+    delay(500);
+  }
+  */
+  
+  
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   
   //GPS Setup
   
@@ -52,7 +104,7 @@ void setupNav() {
   // connect at 115200 so we can read the GPS fast enough and echo without dropping chars
   // also spit it out
   
-  Serial.println("Adafruit GPS library basic test!");
+  //Serial.println("Adafruit GPS library basic test!");
 
   // 9600 NMEA is the default baud rate for Adafruit MTK GPS's- some use 4800
   GPS.begin(9600);
@@ -88,7 +140,7 @@ void navSystem(float d_latitude, float d_longitude, float return_vals[7]) {
    * return_vals[6] --> heading 
    */
   
-
+  //BN0055 runs all the time, so the getHeading function is constantly running. This means we can assign the global variable heading here and still get the heading,
   return_vals[6] = heading;
 
   //GPS Stuff:////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,7 +151,7 @@ void navSystem(float d_latitude, float d_longitude, float return_vals[7]) {
     // a tricky thing here is if we print the NMEA sentence, or data
     // we end up not listening and catching other sentences
     // so be very wary if using OUTPUT_ALLDATA and trying to print out data
-    Serial.println(GPS.lastNMEA()); // this also sets the newNMEAreceived() flag to false
+    //Serial.println(GPS.lastNMEA()); // this also sets the newNMEAreceived() flag to false
     if (!GPS.parse(GPS.lastNMEA())) // this also sets the newNMEAreceived() flag to false
       return; // we can fail to parse a sentence in which case we should just wait for another
   }
@@ -132,7 +184,7 @@ void navSystem(float d_latitude, float d_longitude, float return_vals[7]) {
   float delta1 = radians(d_latitude-actual_latitude);
   float delta2 = radians(d_longitude-actual_longitude);
 
-  //==================Heading Formula Calculation================//
+  //==================Bearing Formula Calculation================//
 
   float y = sin(delta2) * cos(teta2);
   float x = cos(teta1)*sin(teta2) - sin(teta1)*cos(teta2)*cos(delta2);
@@ -150,6 +202,8 @@ void navSystem(float d_latitude, float d_longitude, float return_vals[7]) {
 }
 
 void getHeading() {
+
+    //Getting data from the BN0055
     bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
     bno.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
     bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
@@ -164,7 +218,8 @@ void getHeading() {
     gyro_x = angVelocityData.gyro.x;
     gyro_x = angVelocityData.gyro.x;
     gyro_x = angVelocityData.gyro.x;
-  
+
+    //Getting Heading
     mag_x = magnetometerData.magnetic.x;
     mag_y = magnetometerData.magnetic.y;
     mag_z = magnetometerData.magnetic.z;
@@ -172,11 +227,15 @@ void getHeading() {
     pitch = orientationData.orientation.y * (PI/180) ;
     roll  = orientationData.orientation.z * (PI/180) ;
     yaw   = orientationData.orientation.x * (PI/180) ;
-  
+
+    //Tilt compensating the Magnetometer data, since Wall-E drives at an angle
     mag_x_proj = mag_x * cos(pitch) + mag_y * sin(roll)*sin(pitch) - mag_z*cos(roll)*sin(pitch); //tilt-compensation 
     mag_y_proj = mag_y * cos(roll) + mag_z * sin(roll);
-  
+
+    
     heading = atan2(mag_y_proj, mag_x_proj) * (180/PI) + MAGNETIC_DECLINATION; //heading with corrected declination
+
+    //Making heading between -180 and 180 to correspond with bearings of -180 to 180
     if (heading > 180)
       heading -= 360;  
 }
