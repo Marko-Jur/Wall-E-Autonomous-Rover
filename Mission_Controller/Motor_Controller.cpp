@@ -16,8 +16,8 @@
 #define TERMINATE_DISTANCE 2.5
 
 
-void motorSetup(){
-
+void motorSetup()
+{
 //Setup the motors
  pinMode(RIGHT_MOTOR_A, OUTPUT);
  pinMode(RIGHT_MOTOR_B, OUTPUT);
@@ -38,15 +38,15 @@ void motorSetup(){
 
 }
 
-void motorController(float bearing, float heading, float distance){
-
+void motorController(float bearing, float heading, float distance)
+{
 	//PID constants
 	float motor_KP = 0.15;
 	float motor_KI = 0.00;
 	float motor_KD = 0.00;
 
 	//Setting up a base speed for the motors, eg this is the speed they always turn at and the speeds required to maintain a straight line. These values are determined
- //through experimentation.
+	//through experimentation.
 	int right_motor_base = 120;
 	int left_motor_base = 120;
 
@@ -59,53 +59,65 @@ void motorController(float bearing, float heading, float distance){
 	//Calculating the direction_error between the heading and the bearing
 	float direction_error = bearing - heading;
 
-if (distance > TERMINATE_DISTANCE){
-	//If direction_error is greater than the range, that means we must turn right
-	if (abs(direction_error) > ACCEPTABLE_RANGE){
-		//Calculating the speeds to each motor:
-		right_motor_value = right_motor_base - (motor_KP *direction_error);
-		left_motor_value = left_motor_base + (motor_KP *direction_error);
+	if (direction_error > 180)
+	{
+		direction_error -= 360;
+	}
+	if (direction_error < 180)
+	{
+		direction_error += 360;
+	}
 
-		
-		//Setting right_motor to 0 to stop the value going below 0
-		if (right_motor_value < 0)
-			right_motor_value = 0;
-		else
-			right_motor_value = right_motor_value;
-      
-    //Setting right_motor to 0 to stop the value going below 0
-    if (left_motor_value < 0)
-      left_motor_value = 0;
-    else
-      left_motor_value = left_motor_value;
+	if (distance > TERMINATE_DISTANCE)
+	{
+		//If direction_error is greater than the range, that means we must turn right
+		if (abs(direction_error) > ACCEPTABLE_RANGE)
+		{
+			//Calculating the speeds to each motor:
+			right_motor_value = right_motor_base - (motor_KP *direction_error);
+			left_motor_value = left_motor_base + (motor_KP *direction_error);
 
-		//Setting a left motor to max speed to stop the value going over the max
-		if (left_motor_value > MAX_SPEED)
-			left_motor_value = MAX_SPEED;
-		else
-			left_motor_value = left_motor_value;
-      
-    //Setting a left motor to max speed to stop the value going over the max
-    if (right_motor_value > MAX_SPEED)
-      right_motor_value = MAX_SPEED;
-    else
-      right_motor_value = right_motor_value;
+			
+			//Setting right_motor to 0 to stop the value going below 0
+			if (right_motor_value < 0)
+			{
+				right_motor_value = 0;
+			}
 
-		//Then writing the values to the motors 
+			//Setting right_motor to 0 to stop the value going below 0
+			if (left_motor_value < 0)
+			{
+				left_motor_value = 0;
+			}
+
+			//Setting a left motor to max speed to stop the value going over the max
+			if (left_motor_value > MAX_SPEED)
+			{
+				left_motor_value = MAX_SPEED;
+			}
+
+			//Setting a right motor to max speed to stop the value going over the max
+			if (right_motor_value > MAX_SPEED)
+			{
+				right_motor_value = MAX_SPEED;
+			}
+		}
+		else //Just Drive straight
+		{
+			right_motor_value = right_motor_base;
+			left_motor_value = left_motor_base; 
+		}
+
+		//Then writing the values to the motors
 		analogWrite(RIGHT_MOTOR_ENABLE, right_motor_value);
 		analogWrite(LEFT_MOTOR_ENABLE, left_motor_value);
 	}
-
- //Just Drive straight
- else{
-  
-    right_motor_value = right_motor_base;
-    left_motor_value = left_motor_base;
-    //Then writing the values to the motors 
-    analogWrite(RIGHT_MOTOR_ENABLE, right_motor_value);
-    analogWrite(LEFT_MOTOR_ENABLE, left_motor_value);
-    
- }
+	else
+	{
+		analogWrite(RIGHT_MOTOR_ENABLE, 0);
+		analogWrite(LEFT_MOTOR_ENABLE, 0);
+	}
+	
     /*
 	  Serial.print("Error = "); Serial.print(direction_error);Serial.print("\t");
     Serial.print("Right motor value = ");Serial.print(right_motor_value);Serial.print("\t");
@@ -113,11 +125,4 @@ if (distance > TERMINATE_DISTANCE){
     Serial.println("");
     delay(1);
     */
-}
-
-else{
-    analogWrite(RIGHT_MOTOR_ENABLE, 0);
-    analogWrite(LEFT_MOTOR_ENABLE, 0);
-}
-
 }
