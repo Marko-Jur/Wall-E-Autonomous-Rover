@@ -16,43 +16,58 @@
 
 const int SERVO_DETACH = 2100;
 const int SERVO_ENGAGED = 1200;
-const float ERROR_THRESHOLD = 0.01;
+const float ACC_ERROR_THRESHOLD = 0.02;
+const float MAG_ERROR_THRESHOLD = 0.40;
 
 Servo LANDING_SERVO;
 
 //static variables
 static  sensors_event_t accel_data;
-static double accx = 0;
-static double accy = 0;
-static double accz = 0;
-static double old_accx = 0;
-static double old_accy = 0;
-static double old_accz = 0;
+static float accx = 0;
+static float accy = 0;
+static float accz = 0;
+static float old_accx = 0;
+static float old_accy = 0;
+static float old_accz = 0;
 
 static  sensors_event_t mag_data;
-static double magx = 0;
-static double magy = 0;
-static double magz = 0;
+static float magx = 0;
+static float magy = 0;
+static float magz = 0;
+static float old_magx = 0;
+static float old_magy = 0;
+static float old_magz = 0;
 
 //filter-related info
 static FIRFilter accx_filter;
 static FIRFilter accy_filter;
 static FIRFilter accz_filter;
+static FIRFilter magx_filter;
+static FIRFilter magy_filter;
+static FIRFilter magz_filter;
+
+
+
 const static uint8_t filter_order = 15;
 static float filter_coeff[15] = {-0.005071,0.011302,0.016822,-0.029808,-0.065989,0.051410,
-0.302127, 0.438786,0.302127,0.051410, -0.065989,-0.029808,0.016822,0.011303,-0.005071};
+0.302127, 0.438786,0.302127,0.051410, -0.065989,-0.029808,0.016822,0.011303,-0.005071}; //filter coeficent for FIR LP filter
 static float filter_buff_accx[15] = {0};
 static float filter_buff_accy[15] = {0};
 static float filter_buff_accz[15] = {0};
+static float filter_buff_magx[15] = {0};
+static float filter_buff_magy[15] = {0};
+static float filter_buff_magz[15] = {0};
 
 //bno instance
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28); 
 
 //static functions
+static bool landing_acc_within_range (float old, float current);
+static bool landing_mag_within_range (float old, float current);
 static void landing_update_acceleration(void);
-static void landing_update_magnetics(void);
 static bool landing_acc_reading_is_stable(void);
-
+static void landing_update_magnetics(void);
+static bool landing_mag_reading_is_stable(void);
 
 //global functions
 void landing_setup(void);
@@ -76,14 +91,32 @@ void landing_setup(){
       FIRFilter_Init(&accx_filter, filter_coeff, filter_buff_accx, filter_order);//setup FIR filter for x accelaration
       FIRFilter_Init(&accy_filter, filter_coeff, filter_buff_accy, filter_order);//for y
       FIRFilter_Init(&accz_filter, filter_coeff, filter_buff_accz, filter_order);//for z
+      FIRFilter_Init(&magx_filter, filter_coeff, filter_buff_magx, filter_order);//for x magnetometer reading
+      FIRFilter_Init(&magy_filter, filter_coeff, filter_buff_magy, filter_order);//for y 
+      FIRFilter_Init(&magz_filter, filter_coeff, filter_buff_magz, filter_order);//for z
 }
 
 int landing_detection(int landing_switch){
-    bool flag = landing_acc_reading_is_stable();
-    if(flag)
-        Serial.println("landed !");
+    bool flag1 = landing_acc_reading_is_stable();
+    bool flag2 = landing_mag_reading_is_stable();
+    
+    if(flag1 && flag2)
+        Serial.println("Landed !");
+        
     return 0;
 }
+
+static bool landing_acc_within_range (float old, float current)
+{
+    return (abs(current - old) <= ACC_ERROR_THRESHOLD);
+}
+
+static bool landing_mag_within_range (float old, float current)
+{
+    return (abs(current - old) <= MAG_ERROR_THRESHOLD);
+}
+
+
 
 static void landing_update_acceleration()
 {
@@ -94,11 +127,6 @@ static void landing_update_acceleration()
     accx = FIRFilter_Update (&accx_filter, accel_data.acceleration.x);
     accy = FIRFilter_Update (&accy_filter, accel_data.acceleration.y);
     accz = FIRFilter_Update (&accz_filter, accel_data.acceleration.z);
-}
-
-static bool landing_data_within_range (float old, float current)
-{
-    return (abs(current - old) <= ERROR_THRESHOLD);
 }
 
 static bool landing_acc_reading_is_stable(void)
@@ -117,12 +145,51 @@ static bool landing_acc_reading_is_stable(void)
     while(count < 20)
     {
       landing_update_acceleration();
-      bool det1 = landing_data_within_range(old_accx,accx);
-      bool det2 = landing_data_within_range(old_accy,accy);
-      bool det3 = landing_data_within_range(old_accz,accz);
-      Serial.println(det1);
-      Serial.println(det2);
-      Serial.println(det3);
+      bool det1 = landing_acc_within_range(old_accx,accx);
+      bool det2 = landing_acc_within_range(old_accy,accy);
+      bool det3 = landing_acc_within_range(old_accz,accz);
+      //Serial.println(det1);
+      //Serial.println(det2);
+      //Serial.println(det3);
+      if(det1 && det2 && det3)
+          count++; 
+      else 
+          return false;
+
+      delay(50);
+    }
+    return true;
+}
+
+static bool landing_mag_reading_is_stable(void)
+{
+    int count = 0;
+    //free running for some time to populate the filter signal buffer
+    while(count < 15)
+    {
+      landing_update_magnetics();
+      count++;
+    }
+    
+    count = 0;
+    
+    while(count < 15)
+    {
+      landing_update_magnetics();
+      bool det1 = landing_mag_within_range(old_magx,magx);
+      bool det2 = landing_mag_within_range(old_magy,magy);
+      bool det3 = landing_mag_within_range(old_magz,magz);
+      /*Serial.println("magx   magy   magz");
+      Serial.print(magx);
+      Serial.print("   ");
+      Serial.print(magy);
+      Serial.print("   ");
+      Serial.println(magz);*/
+
+      //Serial.println(det1);
+      //Serial.println(det2);
+      //Serial.println(det3);
+      
       if(det1 && det2 && det3)
           count++; 
       else 
@@ -136,8 +203,10 @@ static bool landing_acc_reading_is_stable(void)
 static void landing_update_magnetics()
 {
     bno.getEvent(&mag_data, Adafruit_BNO055::VECTOR_MAGNETOMETER);
-    
-    magx = mag_data.magnetic.x;
-    magy = mag_data.magnetic.y;
-    magz = mag_data.magnetic.z;
+    old_magx = magx;
+    old_magy = magy;
+    old_magz = magz;
+    magx = FIRFilter_Update (&magx_filter, mag_data.magnetic.x);
+    magy = FIRFilter_Update (&magy_filter, mag_data.magnetic.y);
+    magz = FIRFilter_Update (&magz_filter, mag_data.magnetic.z);
 }
