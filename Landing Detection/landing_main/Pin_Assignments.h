@@ -16,6 +16,11 @@
  #define BN0055_SDA 18
  #define BN0055_SCL 19
 
+ #define BMP_SCK 13
+ #define BMP_MISO 12
+ #define BMP_MOSI 11
+ #define BMP_CS 10
+
  
  //NRF24L01 Assignments:
  //Vin 3.3V
