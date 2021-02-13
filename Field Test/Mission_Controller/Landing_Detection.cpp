@@ -11,6 +11,7 @@
 #include "Landing_Detection.h"
 #include "FIR_Filter.h"
 #include "stdint.h"
+#include "Nav_System.h"
 
 //-------------------------------------------------------------------------------------------------
 // constants
@@ -38,7 +39,7 @@ const static uint8_t filter_order = 15;
 
 Servo landing_servo;
 Adafruit_BMP3XX bmp;
-Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28); 
+//A bno is already there in Nav_System.h 
 
 //-------------------------------------------------------------------------------------------------
 // static variables
@@ -113,10 +114,11 @@ void landing_setup(){
       }
 
       //initialize variable and filter buffer for bno055 operations
-      bno.setExtCrystalUse(true);//use on-board crystal
+
       uint8_t sys = 0, gyro = 0, accel = 0, magn = 0; //other calibration flags are dummy as we are only using
                                                       //accelerometer and compass for landing
       bno.getCalibration(&sys, &gyro, &accel, &magn); //get calibration
+
       FIRFilter_Init(&accx_filter, filter_coeff, filter_buff_accx, filter_order);//setup FIR filter for x accelaration
       FIRFilter_Init(&accy_filter, filter_coeff, filter_buff_accy, filter_order);//for y
       FIRFilter_Init(&accz_filter, filter_coeff, filter_buff_accz, filter_order);//for z
@@ -126,7 +128,7 @@ void landing_setup(){
 
       //initialize the bmp sensor according to datasheet recommendations
       bmp.setPressureOversampling(BMP3_OVERSAMPLING_2X);
-      bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_7);
+      bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_DISABLE);
       bmp.setOutputDataRate(BMP3_ODR_100_HZ);
       
 }

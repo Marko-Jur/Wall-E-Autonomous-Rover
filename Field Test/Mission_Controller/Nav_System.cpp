@@ -39,7 +39,7 @@ sensors_event_t orientationData , angVelocityData , linearAccelData, magnetomete
 
 //function calls:
 
-Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
+
 
 
 void setupNav() {

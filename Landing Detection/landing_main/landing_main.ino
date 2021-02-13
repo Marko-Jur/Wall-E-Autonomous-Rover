@@ -5,5 +5,5 @@ void setup() {
 }
 
 void loop() {
- landing_detection(2);
+ landing_detection();
 }
