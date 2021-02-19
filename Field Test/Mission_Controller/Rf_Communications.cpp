@@ -100,6 +100,6 @@ void sendDataRf() {
   
   radio.write(&send_data, sizeof(send_data));
   
-  threads.yield();
+  //threads.yield();
   }
 } 

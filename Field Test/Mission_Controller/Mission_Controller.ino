@@ -12,7 +12,11 @@
 #include "Nav_System.h"
 #include "Rf_Communications.h"
 #include "Motor_Controller.h"
-#include "Manual_Mode.h"
+#include "Landing_Detection.h"
+
+//----------------------------------------         Marko's Navigation System Code            ---------------------------------------------------------//
+/*
+//#include "Manual_Mode.h"
 
 
 //Defining Globals
@@ -42,7 +46,7 @@ void setup(){
     setupRfCommunications(TX_MODE); //Pass in 0 to set it up as a transmitter
 
     //Setup RC Transmitter
-    rcSetup();
+    //rcSetup();
 
     
 }
@@ -66,8 +70,23 @@ void loop()
   motorController(navigation_data[5],navigation_data[7],navigation_data[4]);
   
 }
+*/
+//__________________________________________ Just to test Landing ------------------------------------------//
 
-  
-  
+ void setup(){
+
+    //Initializae Serial port for debugging
+    Serial.begin(115200);
+
+    //Call setup funciton for the Navigation systen
+    setupNav();
+    landing_setup();
+    
+}
+
+void loop()
+{
+    landing_detection();
+}
   
  

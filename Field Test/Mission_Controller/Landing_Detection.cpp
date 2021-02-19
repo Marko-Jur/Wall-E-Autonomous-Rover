@@ -13,6 +13,7 @@
 #include "stdint.h"
 #include "Nav_System.h"
 
+
 //-------------------------------------------------------------------------------------------------
 // constants
 //-------------------------------------------------------------------------------------------------
@@ -39,7 +40,7 @@ const static uint8_t filter_order = 15;
 
 Servo landing_servo;
 Adafruit_BMP3XX bmp;
-//A bno is already there in Nav_System.h 
+
 
 //-------------------------------------------------------------------------------------------------
 // static variables
@@ -96,17 +97,9 @@ bool landing_detection(void);
 bool landing_start_checking(void);
 
 void landing_setup(){
-  
-      Serial.begin(115200);
 
       landing_servo.attach(SERVO); // attach pin 7
       landing_servo.write(SERVO_ENGAGED);
-
-      //initialize both modules
-      if (!bno.begin())
-      {
-        for(;;){Serial.println("No BNO055 detected");} //shoots the error if disconnected
-      }
 
       if (!bmp.begin_SPI(BMP_CS))
       {
@@ -114,11 +107,6 @@ void landing_setup(){
       }
 
       //initialize variable and filter buffer for bno055 operations
-
-      uint8_t sys = 0, gyro = 0, accel = 0, magn = 0; //other calibration flags are dummy as we are only using
-                                                      //accelerometer and compass for landing
-      bno.getCalibration(&sys, &gyro, &accel, &magn); //get calibration
-
       FIRFilter_Init(&accx_filter, filter_coeff, filter_buff_accx, filter_order);//setup FIR filter for x accelaration
       FIRFilter_Init(&accy_filter, filter_coeff, filter_buff_accy, filter_order);//for y
       FIRFilter_Init(&accz_filter, filter_coeff, filter_buff_accz, filter_order);//for z
@@ -168,7 +156,7 @@ bool landing_start_checking()
 
 static void landing_update_acceleration()
 {
-    bno.getEvent(&accel_data, Adafruit_BNO055::VECTOR_ACCELEROMETER); //update reading
+    serveBNO(&mag_data, true);
     old_accx = accx;
     old_accy = accy;
     old_accz = accz;
@@ -204,6 +192,18 @@ static bool landing_acc_reading_is_stable(void)
     return true;
 }
 
+static void landing_update_magnetics()
+{
+    serveBNO(&mag_data, false);
+    old_magx = magx;
+    old_magy = magy;
+    old_magz = magz;
+    magx = FIRFilter_Update (&magx_filter, mag_data.magnetic.x);
+    magy = FIRFilter_Update (&magy_filter, mag_data.magnetic.y);
+    magz = FIRFilter_Update (&magz_filter, mag_data.magnetic.z);
+}
+
+
 static bool landing_mag_reading_is_stable(void)
 {
     int count = 0;
@@ -233,16 +233,6 @@ static bool landing_mag_reading_is_stable(void)
     return true;
 }
 
-static void landing_update_magnetics()
-{
-    bno.getEvent(&mag_data, Adafruit_BNO055::VECTOR_MAGNETOMETER);
-    old_magx = magx;
-    old_magy = magy;
-    old_magz = magz;
-    magx = FIRFilter_Update (&magx_filter, mag_data.magnetic.x);
-    magy = FIRFilter_Update (&magy_filter, mag_data.magnetic.y);
-    magz = FIRFilter_Update (&magz_filter, mag_data.magnetic.z);
-}
 
 static void landing_update_altitude()
 {

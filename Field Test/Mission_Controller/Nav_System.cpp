@@ -14,6 +14,7 @@
 
 Adafruit_GPS GPS(&GPSSerial);
 IntervalTimer readIMU;
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
 const float EARTH_CIRCUMFERENCE = 40030170.0;
 float avg_heading[1000]= {};
@@ -105,27 +106,27 @@ void setupNav() {
   //Serial.println("Adafruit GPS library basic test!");
 
   // 9600 NMEA is the default baud rate for Adafruit MTK GPS's- some use 4800
-  GPS.begin(9600);
-  // uncomment this line to turn on RMC (recommended minimum) and GGA (fix data) including altitude
-  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
-  // uncomment this line to turn on only the "minimum recommended" data
-  //GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY);
-  // For parsing data, we don't suggest using anything but either RMC only or RMC+GGA since
-  // the parser doesn't care about other sentences at this time
-  // Set the update rate
-  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ); // 1 Hz update rate
-  // For the parsing code to work nicely and have time to sort thru the data, and
-  // print it out we don't suggest using anything higher than 1 Hz
-
-  // Request updates on antenna status, comment out to keep quiet
-  GPS.sendCommand(PGCMD_ANTENNA);
-
-  delay(1000);
-
-  // Ask for firmware version
-  GPSSerial.println(PMTK_Q_RELEASE);
-
-  readIMU.begin(getHeading, BNO055_SAMPLERATE_DELAY_uS);
+//  GPS.begin(9600);
+//  // uncomment this line to turn on RMC (recommended minimum) and GGA (fix data) including altitude
+//  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
+//  // uncomment this line to turn on only the "minimum recommended" data
+//  //GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY);
+//  // For parsing data, we don't suggest using anything but either RMC only or RMC+GGA since
+//  // the parser doesn't care about other sentences at this time
+//  // Set the update rate
+//  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ); // 1 Hz update rate
+//  // For the parsing code to work nicely and have time to sort thru the data, and
+//  // print it out we don't suggest using anything higher than 1 Hz
+//
+//  // Request updates on antenna status, comment out to keep quiet
+//  GPS.sendCommand(PGCMD_ANTENNA);
+//
+//  delay(1000);
+//
+//  // Ask for firmware version
+//  GPSSerial.println(PMTK_Q_RELEASE);
+//
+//  readIMU.begin(getHeading, BNO055_SAMPLERATE_DELAY_uS);
 }
 
 void navSystem(float d_latitude, float d_longitude, float return_vals[7]) {
@@ -231,4 +232,13 @@ void getHeading() {
     if (heading > 180)
       heading -= 360;  
       
+}
+
+//services bno data to Nav_System's friend Landing_Detection
+void serveBNO(sensors_event_t* event_data, bool indicator) 
+{
+  if(indicator) // if indicator = true, get acceleration data for landing
+    bno.getEvent(event_data,Adafruit_BNO055::VECTOR_ACCELEROMETER);
+  else         //  if indicator = false, get magnetometer data for landing
+    bno.getEvent(event_data,Adafruit_BNO055::VECTOR_MAGNETOMETER);
 }

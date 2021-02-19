@@ -26,7 +26,7 @@ const static float MAG_ERROR_THRESHOLD = 0.40;
 const static float ALT_ERROR_THRESHOLD = 1.00; // a relatively large range to account for errors
 
 //constants for altitude check
-const static float SEALEVELPRESSURE_HPA = 1021.9; // sea level pressure of the day to be set on the competition day
+const static float SEALEVELPRESSURE_HPA = 1010.4; // sea level pressure of the day to be set on the competition day
 const static float DESTINATION_ALTITUDE = 190.0;     // the altitude of destination
 const static float START_CHECKING_ALTITUDE = 189.0;  // the altitude to start checking the sensors
 
@@ -126,7 +126,7 @@ void landing_setup(){
 
       //initialize the bmp sensor according to datasheet recommendations
       bmp.setPressureOversampling(BMP3_OVERSAMPLING_2X);
-      bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_7);
+      bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_DISABLE);
       bmp.setOutputDataRate(BMP3_ODR_100_HZ);
       
 }
