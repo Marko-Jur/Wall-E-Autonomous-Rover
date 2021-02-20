@@ -40,4 +40,7 @@
 //RC Pins
 #define RCRX 6
 
+//Constants
+const int NUM_DATA_POINTS = 2;
+
 #endif

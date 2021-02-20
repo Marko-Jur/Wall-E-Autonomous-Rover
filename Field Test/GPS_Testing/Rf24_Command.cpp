@@ -6,11 +6,13 @@
  */
 
 #include "Wall-E_Libraries.h"
+#include "Pin_Assignments.h"
 
 RF24 radio(7, 8); // CE, CSN
 
 const byte address[6] = "00001";
-char recvData[32] = "";
+// char recvData[32] = ""; //debugging
+int recvData[32] = "";
 
 void setupCommandTranceiver()
 {
@@ -28,16 +30,19 @@ void commandListen()
   if (radio.available())
   {
     radio.read(&recvData, sizeof(recvData));
-    Serial.println(recvData);
+    for (int i = 0; i < NUM_DATA_POINTS; i++)
+    {
+      //TODO: add labels data variables
+      Serial.print(data[i]);
+      Serial.print("    ");
+    }
+    Serial.println();
   }
 }
 
-void commandSend()
+void commandSend(int data[NUM_DATA_POINTS])
 {
   radio.stopListening();
-  const int latitude = 1;  //replace later
-  const int longitude = 2; //replace later
-  const int data[2] = {latitude, longitude};
   radio.write(&data, sizeof(data));
   delay(500);
 }

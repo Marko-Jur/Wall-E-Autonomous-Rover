@@ -5,8 +5,15 @@
  *  Purpose: 
  */
 
+#ifndef _RF_COMMS_H
+#define _RF_COMMS_H
+
+#include "Pin_Assignments.h"
+
 void setupRoverTranceiver();
 
-void roverListen();
+int[] roverListen();
 
 void roverSend();
+
+#endif
