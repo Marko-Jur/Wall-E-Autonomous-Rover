@@ -7,6 +7,7 @@
 
 #include "Wall-E_Libraries.h"
 #include "Pin_Assignments.h"
+#include "Rf24_Command.h"
 
 RF24 radio(7, 8); // CE, CSN
 

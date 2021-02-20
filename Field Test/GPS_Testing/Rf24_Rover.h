@@ -12,7 +12,7 @@
 
 void setupRoverTranceiver();
 
-int[] roverListen();
+int* roverListen();
 
 void roverSend();
 
