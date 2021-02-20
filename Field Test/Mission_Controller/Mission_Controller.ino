@@ -15,7 +15,7 @@
 #include "Landing_Detection.h"
 
 //----------------------------------------         Marko's Navigation System Code            ---------------------------------------------------------//
-/*
+
 //#include "Manual_Mode.h"
 
 
@@ -51,42 +51,61 @@ void setup(){
     
 }
 
-void loop()
+int main (void)
 {
- 
-  navSystem(target_data[0],target_data[1],navigation_data);
+  for(;;)
+  {
+    if(landing_start_checking())
+    {
+      break;
+    }
+  }
+
+  for(;;)
+  {
+    if(landing_detection())
+    {
+      break;
+    }
+  }
   
-  
-  Serial.print("Fix: ");Serial.print(navigation_data[0]);Serial.print("\t");
-  Serial.print("Sat: ");Serial.print(navigation_data[1]);Serial.print("\t");
-  Serial.print("Lat: ");Serial.print(navigation_data[2],6);Serial.print("\t");
-  Serial.print("Lon: ");Serial.print(navigation_data[3],6);Serial.print("\t");
-  Serial.print("Distance: ");Serial.print(navigation_data[4]);Serial.print("\t");
-  Serial.print("bearing: ");Serial.print(navigation_data[5]);Serial.print("\t");
-  Serial.print("heading: ");Serial.print(navigation_data[6]);Serial.print("\t");
-  Serial.println("");
-  delay(1);
-  
-  motorController(navigation_data[5],navigation_data[7],navigation_data[4]);
-  
+  for(;;)
+  {
+    navSystem(target_data[0],target_data[1],navigation_data);
+    
+    
+    Serial.print("Fix: ");Serial.print(navigation_data[0]);Serial.print("\t");
+    Serial.print("Sat: ");Serial.print(navigation_data[1]);Serial.print("\t");
+    Serial.print("Lat: ");Serial.print(navigation_data[2],6);Serial.print("\t");
+    Serial.print("Lon: ");Serial.print(navigation_data[3],6);Serial.print("\t");
+    Serial.print("Distance: ");Serial.print(navigation_data[4]);Serial.print("\t");
+    Serial.print("bearing: ");Serial.print(navigation_data[5]);Serial.print("\t");
+    Serial.print("heading: ");Serial.print(navigation_data[6]);Serial.print("\t");
+    Serial.println("");
+    delay(1);
+    
+    motorController(navigation_data[5],navigation_data[7],navigation_data[4]);
+
+    return 0;
+  }
 }
-*/
+
 //__________________________________________ Just to test Landing ------------------------------------------//
 
- void setup(){
-
-    //Initializae Serial port for debugging
-    Serial.begin(115200);
-
-    //Call setup funciton for the Navigation systen
-    setupNav();
-    landing_setup();
-    
-}
-
-void loop()
-{
-    landing_detection();
-}
+// void setup(){
+//
+//    //Initializae Serial port for debugging
+//    Serial.begin(115200);
+//
+//    //Call setup funciton for the Navigation systen
+//    setupNav();
+//    landing_setup();
+//    
+//}
+//
+//void loop()
+//{
+//    landing_detection();
+//}
   
  

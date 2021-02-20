@@ -1,5 +1,5 @@
 /*Function: Landing Detection
- *Author: Marko Jurisic
+ *Author: Marko Jurisic + Francis Fu
  *Input Parameters: None
  *Output Parameters: Landing Flag
  *
@@ -29,7 +29,6 @@ const static float ALT_ERROR_THRESHOLD = 1.00; // a relatively large range to ac
 
 //constants for altitude check
 const static float SEALEVELPRESSURE_HPA = 1021.9; // sea level pressure of the day to be set on the competition day
-const static float DESTINATION_ALTITUDE = 190.0;     // the altitude of destination
 const static float START_CHECKING_ALTITUDE = 189.0;  // the altitude to start checking the sensors
 
 const static uint8_t filter_order = 15;
@@ -65,6 +64,7 @@ static float old_magz = 0;
 
 //bmp388 altitude
 static float alt_data = 0;
+static float old_alt_data = 0;
 
 //filter-related info
 static FIRFilter accx_filter;
@@ -90,6 +90,7 @@ static bool landing_acc_reading_is_stable (void);
 static void landing_update_magnetics (void);
 static bool landing_mag_reading_is_stable (void);
 static void landing_update_altitude (void);
+static bool landing_alt_reading_is_stable(void);
 
 //global functions
 void landing_setup(void);
@@ -128,27 +129,24 @@ bool landing_detection(){
       //acc and mag stability check
     flag1 = landing_acc_reading_is_stable();
     flag2 = landing_mag_reading_is_stable();
+    flag3 = landing_alt_reading_is_stable();
 
-    Serial.println(alt_data);
-      //altitude matching check
-    landing_update_altitude();
-    flag3 = landing_within_range(alt_data, DESTINATION_ALTITUDE, ALT_ERROR_THRESHOLD);
-    
+    //Serial.println(alt_data);
     
     if(flag1 && flag2 && flag3)
     {
-        Serial.println("Landed !");
+        //Serial.println("Landed !");
         landing_servo.write(SERVO_DETACH); 
     }
         
-    return 0;
+    return (flag1 && flag2 && flag3);
 }
 
 //checks whether we should start the landing detection algorithm
 bool landing_start_checking()
 {
     landing_update_altitude();
-    if(alt_data > 200)
+    if(alt_data > START_CHECKING_ALTITUDE)
       return true;
     else
       return false;
@@ -233,12 +231,33 @@ static bool landing_mag_reading_is_stable(void)
     return true;
 }
 
+static bool landing_alt_reading_is_stable(void)
+{
+    int count = 0;
+    
+    while(count < 8)
+    {
+      landing_update_altitude();
+      bool det = landing_within_range(old_alt_data,alt_data,ALT_ERROR_THRESHOLD);
+      
+      if(det)
+          count++; 
+      else 
+          return false;
+    }
+
+    return true;
+}
+
 
 static void landing_update_altitude()
 {
     bool det = bmp.performReading();
     if(det)
+    {
+       old_alt_data = alt_data;
        alt_data = bmp.readAltitude(SEALEVELPRESSURE_HPA); // data in meters
+    }
 }
 
 static bool landing_within_range (float old, float current, float range)
