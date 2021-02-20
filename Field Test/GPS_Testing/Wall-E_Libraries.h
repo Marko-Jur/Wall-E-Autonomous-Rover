@@ -5,10 +5,11 @@
  *  Purpose: Contains all libraries required for Wall-E autonomous driving code
  */
 
-#ifndef _Libraries_H    
-#define _Libraries_H    
+#ifndef _Libraries_H
+#define _Libraries_H
 
 //RF Libraries
+#include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
 
@@ -26,6 +27,5 @@
 
 //PPM Library
 #include <PulsePosition.h>
-
 
 #endif
