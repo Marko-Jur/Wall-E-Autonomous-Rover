@@ -10,7 +10,6 @@
 #include "Rf24_Rover.h"
 
 RF24 radio(7, 8); // CE, CSN
-const int NUM_DATA_POINTS = 2;
 const int data[NUM_DATA_POINTS] = {};
 //const char sendData[] = "Message from Wall-E"; //debugging
 const int sendData[] = {};
