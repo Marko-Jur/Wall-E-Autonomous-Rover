@@ -3,10 +3,11 @@
 #include <RF24.h>
 RF24 radio(7, 8); // CE, CSN
 
-const int NUM_DATA_POINTS = 4;
+const int NUM_DATA_POINTS = 32;
 const byte addresses[][6] = {"00001", "00002"};
-const int recvData[NUM_DATA_POINTS] = {};
-const int sendData[] = {5, 6, 7, 8};
+//const double recvData[NUM_DATA_POINTS] = {};
+const char recvData[NUM_DATA_POINTS] = {};
+const double sendData[] = {5.23, 6.23, 7.23, 8.23};
 
 void setup() {
   Serial.begin(9600);
@@ -22,11 +23,12 @@ void loop() {
   radio.startListening();
   while (radio.available() && (millis() - loop_start < 500)) {
     radio.read(&recvData, sizeof(recvData));
-    for (int i = 0; i < NUM_DATA_POINTS; i++) {
-      Serial.print(recvData[i]);
-      Serial.print("   ");
-    }
-    Serial.println();
+    //for (int i = 0; i < NUM_DATA_POINTS; i++) {
+    //  Serial.print(recvData[i]);
+    //  Serial.print("   ");
+    //}
+    //Serial.println();
+    Serial.println(recvData);
   }
 
   delay(25);
